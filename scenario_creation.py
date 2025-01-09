@@ -35,8 +35,9 @@ def initiate_scenario(topic: str):
     ### Task 1: ###
     Create a detailed scenario to test the personality type of the agents in the topic {topic} in which 2 agents will participate. 
     ### Task 2: ###
-    Create 5 questions (for each category of character type according to Big5), according to which agents will be evaluated. 
+    Create a goal for each agent. An agent will aims to   
     ### Task 3: ###
+    Create 5 questions (for each category of character type according to Big5), according to which agents will be evaluated. 
     The questions must allow you to clearly state an aspect of the agent's character. The Big 5 categories are Openness, Conscientiousness, Agreeableness, Extroversion, Neuroticism and for these categories you must create questions that fit the scenario.
 
     ### Format: ###
