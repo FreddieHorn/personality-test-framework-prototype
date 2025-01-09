@@ -1,18 +1,11 @@
-# Example topics where personality matters:
-# Conflict resolution, Teacher-student roleplaying - trying to get a better grade, Office collaboration of a tight deadline, 
-# Debating climate change solutions, handling a technical failure in a project.
-import torch
-from jsonformer import Jsonformer
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
-
-def initiate_scenario(topic: str):
+def initiate_scenario_prompt(topic: str):
 
     json_format = {
         "topic" : "Topic of the scenario, in which agents participate", 
         "description" : "Detailed description of the scenario",
         "agent_1_goal" : "Goal(s), which agent 1 has to achieve in the scenario",
         "agent_2_goal" : "Goal(s), which agent 2 has to achieve in the scenario",
-        "personality_test_points_question" : {"Openness": "In which aspect of the scenario, will the openness of the agents be tested? How is the scenario testing agents when it comes to openness?",
+        "personality_test_points_questions" : {"Openness": "In which aspect of the scenario, will the openness of the agents be tested? How is the scenario testing agents when it comes to openness?",
         "Conscientiousness": "In which aspect of the scenario, will the conscientiousness of the agents be tested? How is the scenario testing agents when it comes to conscientiousness?",
         "Agreeableness" : "In which aspect of the scenario, will the agreeableness of the agents be tested? How is the scenario testing agents when it comes to agreeableness?",
         "Extroversion" : "In which aspect of the scenario, will the extroversion of the agents be tested? How is the scenario testing agents when it comes to extroversion?",
@@ -49,14 +42,46 @@ def initiate_scenario(topic: str):
     ]
     return messages
 
-chat_template = """### System:
-{system_message}
-### User:
-{user_message}
-"""
-def create_scenario(topic, model, tokenizer, json_schema):
-    messages = initiate_scenario(topic)
-    prompt = tokenizer.apply_chat_template(messages, chat_template=chat_template, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    jsonformer = Jsonformer(model, tokenizer, json_schema, prompt)
-    generated_data = jsonformer()
-    return generated_data
+def rate_agents_prompt(episode: list, scenario_questions: dict)
+    episode_content = '\n'.join(episode)
+    
+    json_format = {
+        "agent_1" : {
+            "personality_test_points" : {
+                "Openness" : "How open (Big5 Openness) is the agent 1? Scale (-5,5)",
+                "Conscientiousness" : "How open (Big5 Openness) is the agent 1? Scale (-5,5)",
+                "Agreeableness" : "How open (Big5 Openness) is the agent 1? Scale (-5,5)",
+                "Extroversion" : "How open (Big5 Openness) is the agent 1? Scale (-5,5)",
+                "Neuroticism" : "How open (Big5 Openness) is the agent 1? Scale (-5,5)"
+            }
+        },
+        "agent_2" : {
+            "personality_test_points" : {
+                "Openness" : "How open (Big5 Openness) is the agent 2? Scale (-5,5)",
+                "Conscientiousness" : "How conscientious (Big5 Conscientiousness) is the agent 2? Scale (-5,5)",
+                "Agreeableness" : "How agreeable (Big5 Agreeableness) is the agent 2? Scale (-5,5)",
+                "Extroversion" : "How extroverted (Big5 Extroversion) is the agent 2? Scale (-5,5)",
+                "Neuroticism" : "How neurotic (Big5 Neuroticism) is the agent 2? Scale (-5,5)"
+            }
+        }
+    }
+
+    system_message = f"""
+    Your job is to evaluate a conversation between two agents and then judge each of their personality aspects according to Big5 Personalities (Openness, Conscientiousness,
+    Agreeableness, Extroversion, Neuroticism). You will analyze the conversations between the agents and then evaluate the agents' personality traits according to the questions you get. 
+    Each question is designed to rate the agents on one of the big5 personality traits. In the end, each agent will receive a score from -5 (low manifestation of the trait) and
+    5 (high manifestation of the trait).
+    """
+    user_message = f"""
+    ### Conversation: ###
+    {episode_content}
+    ### Questions: ###
+    {scenario_questions}
+    """
+
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role" : "user", "content": user_message}
+    ]
+
+    return messages
