@@ -1,6 +1,7 @@
-def initiate_scenario_prompt(topic: str):
+def initiate_scenario_prompt(setting: str, topic: str):
 
     json_format = {
+        "setting" : "Background in which the topic of the scenario will take place. For example, may be professional, academic or ethical dillemas"
         "topic" : "Topic of the scenario, in which agents participate", 
         "description" : "Detailed description of the scenario",
         "agent_1_goal" : "Goal(s), which agent 1 has to achieve in the scenario",
@@ -13,7 +14,7 @@ def initiate_scenario_prompt(topic: str):
     }
 
     system_message = f"""
-    Your job is to create a scenario in a certain topic given by the user, in which two agents will participate. Each agent will also have a clear goal that he/she want to achieve
+    Your job is to create a scenario in a setting and a specific topic given by the user, in which two agents will participate. Each agent will also have a clear goal that he/she want to achieve
     during the scenario. When the scenario finishes, each agent is judged in 5 different aspects of personality (with accordance to Big5). Thus, the system needs to create 5 questions 
     which will test agent's:
     - Openness
@@ -26,7 +27,7 @@ def initiate_scenario_prompt(topic: str):
     """
     user_message = f"""
     ### Task 1: ###
-    Create a detailed scenario to test the personality type of the agents in the topic {topic} in which 2 agents will participate. 
+    Create a detailed scenario to test the personality type of the agents in the {setting} setting and more specifically in the topic {topic} in which 2 agents will participate. 
     ### Task 2: ###
     Create a goal for each agent. An agent will aims to   
     ### Task 3: ###
@@ -49,10 +50,10 @@ def rate_agents_prompt(episode: list, scenario_questions: dict)
         "agent_1" : {
             "personality_test_points" : {
                 "Openness" : "How open (Big5 Openness) is the agent 1? Scale (-5,5)",
-                "Conscientiousness" : "How open (Big5 Openness) is the agent 1? Scale (-5,5)",
-                "Agreeableness" : "How open (Big5 Openness) is the agent 1? Scale (-5,5)",
-                "Extroversion" : "How open (Big5 Openness) is the agent 1? Scale (-5,5)",
-                "Neuroticism" : "How open (Big5 Openness) is the agent 1? Scale (-5,5)"
+                "Conscientiousness" : "How conscientious (Big5 Conscientiousness) is the agent 1? Scale (-5,5)",
+                "Agreeableness" : "How agreeable (Big5 Agreeableness) is the agent 1? Scale (-5,5)",
+                "Extroversion" : "How extroverted (Big5 Extroversion) is the agent 1? Scale (-5,5)",
+                "Neuroticism" : "How neurotic (Big5 Neuroticism) is the agent 1? Scale (-5,5)"
             }
         },
         "agent_2" : {
