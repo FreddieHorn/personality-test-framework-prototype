@@ -1,7 +1,7 @@
 JSON_SCHEMA_SCENARIO = {
         "type": "object",
         "properties" : {
-            "setting" : "string"
+            "setting" : "string",
             "topic" : "string", 
             "description" : "string",
             "agent_1_goal" : "string",

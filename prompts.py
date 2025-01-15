@@ -1,7 +1,7 @@
 def initiate_scenario_prompt(setting: str, topic: str):
 
     json_format = {
-        "setting" : "Background in which the topic of the scenario will take place. For example, may be professional, academic or ethical dillemas"
+        "setting" : "Background in which the topic of the scenario will take place. For example, may be professional, academic or ethical dillemas",
         "topic" : "Topic of the scenario, in which agents participate", 
         "description" : "Detailed description of the scenario",
         "agent_1_goal" : "Goal(s), which agent 1 has to achieve in the scenario",
@@ -43,7 +43,7 @@ def initiate_scenario_prompt(setting: str, topic: str):
     ]
     return messages
 
-def rate_agents_prompt(episode: list, scenario_questions: dict)
+def rate_agents_prompt(episode: list, scenario_questions: dict):
     episode_content = '\n'.join(episode)
     
     json_format = {

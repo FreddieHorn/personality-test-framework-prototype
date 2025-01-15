@@ -56,7 +56,7 @@ class Agent:
 
 # Class that emulates interaction between agents (agentic behaviour)
 class AgentInteraction:
-    def __init__(self, agents_config: dict, scenario_config: dict, turns: int)
+    def __init__(self, agents_config: dict, scenario_config: dict, turns: int):
         self.turns = turns
         self.agents_config = agents_config
         self.scenario_config = scenario_config
@@ -71,7 +71,7 @@ class AgentInteraction:
                         start = True)
         agent_2 = Agent(personality = self.agents_config["agent_2_personality"], 
                 scenario = self.scenario_config["description"],
-                goal = self.scenario_config["agent_2_goal"]
+                goal = self.scenario_config["agent_2_goal"],
                 json_schema = JSON_SCHEMA_AGENT_TURN)
     def conduct_interaction(self):
         episode = []
