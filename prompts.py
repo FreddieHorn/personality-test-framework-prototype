@@ -35,7 +35,7 @@ def initiate_scenario_prompt(setting: str, topic: str):
     The questions must allow you to clearly state an aspect of the agent's character. The Big 5 categories are Openness, Conscientiousness, Agreeableness, Extroversion, Neuroticism and for these categories you must create questions that fit the scenario.
 
     ### Format: ###
-    {json_format}
+    Use the following json format{json_format}
     """
     messages = [
         {"role": "system", "content": system_message},

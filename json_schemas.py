@@ -12,7 +12,8 @@ JSON_SCHEMA_SCENARIO = {
         "Extroversion" : "string",
         "Neuroticism" : "string"}
         }
-    }}
+    },
+    "required": ["setting", "topic", "description","agent_1_goal", "agent_2_goal","personality_test_points_questions"]}
 
 JSON_SCHEMA_AGENT_TURN = {
     "type" : "object",
