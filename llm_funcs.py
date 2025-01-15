@@ -12,8 +12,8 @@ chat_template = """### System:
 ### User:
 {user_message}
 """
-def create_scenario(topic, model, tokenizer, json_schema):
-    messages = initiate_scenario_prompt(topic)
+def create_scenario(setting, topic, model, tokenizer, json_schema):
+    messages = initiate_scenario_prompt(setting, topic)
     prompt = tokenizer.apply_chat_template(messages, chat_template=chat_template, tokenize=False, add_generation_prompt=True, return_tensors="pt")
     jsonformer = Jsonformer(model, tokenizer, json_schema, prompt)
     generated_data = jsonformer()
