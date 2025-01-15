@@ -3,7 +3,7 @@ def initiate_scenario_prompt(setting: str, topic: str):
     json_format = {
         "setting" : "Background in which the topic of the scenario will take place. For example, may be professional, academic or ethical dillemas",
         "topic" : "Topic of the scenario, in which agents participate", 
-        "description" : "Detailed description of the scenario",
+        "description" : "Detailed description of the scenario. Should describe the situation in which the agents are at the moment. Description should be medium long and rich in details",
         "agent_1_goal" : "Goal(s), which agent 1 has to achieve in the scenario",
         "agent_2_goal" : "Goal(s), which agent 2 has to achieve in the scenario",
         "personality_test_points_questions" : {"Openness": "In which aspect of the scenario, will the openness of the agents be tested? How is the scenario testing agents when it comes to openness?",
@@ -14,7 +14,7 @@ def initiate_scenario_prompt(setting: str, topic: str):
     }
 
     system_message = f"""
-    Your job is to create a scenario in a setting and a specific topic given by the user, in which two agents will participate. Each agent will also have a clear goal that he/she want to achieve
+    Your job is to create a scenario in a setting and a specific topic given by the user, in which two agents will participate. The scenario description should be medium long, rich in details and clearly describe what agents want to achieve. Each agent will also have a clear goal that he/she want to achieve
     during the scenario. When the scenario finishes, each agent is judged in 5 different aspects of personality (with accordance to Big5). Thus, the system needs to create 5 questions 
     which will test agent's:
     - Openness
@@ -27,7 +27,7 @@ def initiate_scenario_prompt(setting: str, topic: str):
     """
     user_message = f"""
     ### Task 1: ###
-    Create a detailed scenario to test the personality type of the agents in the {setting} setting and more specifically in the topic {topic} in which 2 agents will participate. 
+    Create a detailed scenario to test the personality type of the agents in the {setting} setting and more specifically in the topic: {topic} in which 2 agents will participate. 
     ### Task 2: ###
     Create a goal for each agent. An agent will aims to   
     ### Task 3: ###

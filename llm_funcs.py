@@ -9,12 +9,13 @@ from prompts import initiate_scenario_prompt, rate_agents_prompt
 
 chat_template = """### System:
 {system_message}
-### User:
+### User:   
 {user_message}
 """
+
 def create_scenario(setting, topic, model, tokenizer, json_schema):
     messages = initiate_scenario_prompt(setting, topic)
-    prompt = tokenizer.apply_chat_template(messages, chat_template=chat_template, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    prompt = tokenizer.apply_chat_template(messages, chat_template=chat_template, tokenize=False, add_generation_prompt=True, return_tensors="pt", max_string_token_length=2000)
     jsonformer = Jsonformer(model, tokenizer, json_schema, prompt)
     generated_data = jsonformer()
     return generated_data

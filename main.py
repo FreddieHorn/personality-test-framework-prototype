@@ -28,10 +28,11 @@ scenario_config = create_scenario(setting=SETTING, topic=TOPIC, model=model, tok
 with open("scenario.json", "w") as file:
     json.dump(scenario_config, file, indent=4)  # 'indent' makes the file more readable
 
+# Below code has errors heh
 agents_config = {"agent_1_personality" : "Donald Trump",
                 "agent_2_personality" : "Clark Kent"}
 interaction_framework = AgentInteraction(agents_config = agents_config,
-                                        scenario_config = scenario_config)
+                                        scenario_config = scenario_config, turns=10)
 print(f"Beggining the conversation between two agents...")
 conversation = interaction_framework.conduct_interaction()
 
@@ -39,9 +40,7 @@ print(f"Writing the convo to the file")
 with open(filename, "w") as file:
     for item in conversation:
         file.write(f"{item}\n")
-# agent_1 = Agent(character_name = "Donald Trump", 
-#                 scenario = scenario_config["description"],
-#                 goal = scenario_config["agent_1_goal"],
-#                 js)
+
+# Evaluate agents
 
 
