@@ -7,7 +7,7 @@ import pandas as pd
 # from environment import Agent, AgentInteraction
 from jsonformer import Jsonformer
 
-def llama_3_prompt(interaction,agent1,agent2, goal, scenario, personality1, personality2,setting, topic, model, tokenizer):    # Define the JSON structure for the result
+def llama_3_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, model, tokenizer):    # Define the JSON structure for the result
     json_format = {
     "type": "object",
     "properties": {
@@ -78,7 +78,8 @@ def llama_3_prompt(interaction,agent1,agent2, goal, scenario, personality1, pers
 
     ### Goal: ###
 
-    When a user presents a simulated interaction between two characters with specific personality types, given as vectors, within a defined scenario with specified shared character goals , your task is to evaluate the interaction. Assess the interaction across the following seven dimensions, assigning a score within the specified range for each.
+    When a user presents a simulated interaction between two characters with specific personality types, given as vectors, within a defined scenario with specified shared character goals and also personal character goals, your task is to evaluate the interaction. Assess the interaction across the following seven dimensions, assigning a score within the specified range for each.
+    You will assign the scores to the agents based on the interaction, shared goals and agent-specific goals
     BEL
     Reasoning requirement: 1. Evaluate if the agent interacts with
     others in a natural and realistic manner (here are a few common
@@ -191,6 +192,8 @@ def llama_3_prompt(interaction,agent1,agent2, goal, scenario, personality1, pers
     Character 1: {agent1} with personality type: {personality1}
     Character 2: {agent2} with personality type: {personality2}
     Shared Goal: {goal}
+    First Agent Goal: {first_agent_goal}
+    Second Agent Goal: {second_agent_goal}
     scenario:{scenario}
     setting:{setting}
     topic:{topic}
@@ -201,9 +204,11 @@ def llama_3_prompt(interaction,agent1,agent2, goal, scenario, personality1, pers
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
+    print("TOKENIZER")
     prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
 
 
+    print("JSONFORMER PIPELINE DECLARATION")
     # Use Jsonformer with the pipeline
     jsonformer_pipeline = Jsonformer(
         model, 
@@ -212,7 +217,7 @@ def llama_3_prompt(interaction,agent1,agent2, goal, scenario, personality1, pers
         prompt=prompt,
         max_string_token_length=1000
     )
-
+    print("JSONFORMER PIPELINE")
     # Generate output
     result = jsonformer_pipeline()
     return result
@@ -230,11 +235,12 @@ def main():
     print("Model&Tokenizer declaration...")
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, device_map="auto")
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-
+    print("models declared")
     # Load the input data
-    input_csv = '/home/s33zganj/personality-test-framework/pesonality_test_Sheet.csv'
+    input_csv = 'pipeline_output.csv'
+    output_csv = 'evaluation.csv'
     data = pd.read_csv(input_csv)
-
+    print("read CSV")
     # Process rows
     results = []
     for _, row in data.iterrows():
@@ -243,6 +249,8 @@ def main():
             agent1=row["Character1"],
             agent2=row["Character2"],
             goal=row["shared_goal"],
+            first_agent_goal=row["first_agent_goal"],
+            second_agent_goal=row["second_agent_goal"],
             scenario=row["scenario"],
             personality1=row["Personality1"],
             personality2=row["Personality2"],
@@ -257,8 +265,8 @@ def main():
     data["Character 1 evaluation"] = [result.get("Agent A", "") for result in results]
     data["Character 2 evaluation"] = [result.get("Agent B", "") for result in results]
     
-    data.to_csv(input_csv, index=False)
-    print(f"Results saved to {input_csv}")
+    data.to_csv(output_csv, index=False)
+    print(f"Results saved to {output_csv}")
 
 
 if __name__ == "__main__":

@@ -2,10 +2,8 @@ import torch
 import json
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import pandas as pd
-from json_schemas import JSON_SCHEMA_SCENARIO
 # from llm_funcs import create_scenario
 # from environment import Agent, AgentInteraction
-from jsonformer import Jsonformer
 from prompts import scenario_creation_prompt
 
 def main():
@@ -41,7 +39,9 @@ def main():
      # Save results
     data["scenario"] = [result.get("scenario", "") for result in results]
     data["shared_goal"] = [result.get("shared_goal", "") for result in results]
-    
+    data["first_agent_goal"] = [result.get("first_agent_goal", "") for result in results]
+    data["second_agent_goal"] = [result.get("second_agent_goal", "") for result in results]
+
     data.to_csv(output_csv, index=False)
     print(f"Results saved to {output_csv}")
 
