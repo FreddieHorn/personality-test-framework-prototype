@@ -1,27 +1,37 @@
 from jsonformer import Jsonformer
 
-def evaluation_prompt(agent1, agent2, scenario, goals1, goals2, shared_goal):
+def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, model, tokenizer):
     json_format = {
+    "type": "object",
+    "properties": {
         "Agent A": {
-            "Goal": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
+            "type": "object",
+            "properties": {
+                "Goal": {"type": "object", "properties": {"score": {"type": "string"}, "reasoning": {"type": "string"}}, "required": ["score", "reasoning"]}
+            },
+            "required": ["Goal"]
         },
         "Agent B": {
-            "Goal": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
+            "type": "object",
+            "properties": {
+                "Goal": {"type": "object", "properties": {"score": {"type": "string"}, "reasoning": {"type": "string"}}, "required": ["score", "reasoning"]}
+            },
+            "required": ["Goal"]
         }
-    }
-
-    system_message = f"""
+    },
+    "required": ["Agent A", "Agent B"]
+}
+    # System message setting up the task for Llama
+    system_message = """
     #### Persona: ###
-    Imagine you are an expert with an exceptional memory for iconic scenes and a deep understanding of human social dynamics.
-    You will evaluate whether each of the agents achieved their goal in the interaction. Then you will score the agent based on 7 distinct dimensions.
-
-    You can evaluate the interaction between two agents based on 7 distinct dimensions, providing a score for each dimension within the range [lower bound–upper bound] which specified for each dimension in the description bellow.
+    You are an expert in behavioral psychology and personality analysis. You can evaluate the interaction between two agents based on 7 distinct dimensions, providing a score for each dimension within the range [lower bound–upper bound] which specified for each dimension in the description bellow.
     Below is a detailed explanation of each dimension:
 
     Goal Completion (GOAL) [0–10] is the extent to which the agent achieved their goals. Agents’ social goals, defined by the environment, are the primary drivers of their behavior.
-
     ### Goal: ###
-    When a user presents a simulated interaction between two movie characters within a defined scenario with specified character goals and relationship, your task is to evaluate the interaction. Using the provided instructions and your knowledge of the characters' personalities and traits, assess the interaction across the following seven dimensions, assigning a score within the specified range for each.
+
+    When a user presents a simulated interaction between two characters with specific personality types, given as vectors, within a defined scenario with specified shared character goals and also personal character goals, your task is to evaluate the interaction. Assess the interaction across the following seven dimensions, assigning a score within the specified range for each.
+    You will assign the scores to the agents based on the interaction, shared goals and agent-specific goals
     GOAL
     Please first reiterate agent’s goals. And then please
     provide a comprehensive analysis about the extent to which the
@@ -39,74 +49,29 @@ def evaluation_prompt(agent1, agent2, scenario, goals1, goals2, shared_goal):
         --Goal: score in range [0,10], reasoning:Reason of your score for this evaluation dimension
     - Agent B:
         --Goal: score in range [0,10], reasoning:Reason of your score for this evaluation dimension
-
-    """
-
-    user_message = f"""
-    ### Question: ###
-    Please evaluate the simulated interaction between two  characters, agent A:{agent1} and agent B: {agent2}. 
-    This interaction takes place within the following scenario: {scenario}, where character 1 is pursuing these specific goals: {goals1} and character 2 is pursuing these specific goals: {goals2}.
-    Both these characters worked towards the shared goal {shared_goal}.
-
-    Ensure your output aligns with the provided evaluation criteria and instructions.
-
-    ### Format: ###
-    Use the following json format:
-    {json_format}
-    """
-    messages = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": user_message},
-        ]
-
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-        # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
-    )
-
-    # Generate output
-    result = jsonformer_pipeline()
-
-    return(messages)
-
-
-def evaluate_goal_completion_prompt(setting, topic, model, tokenizer):    # Define the JSON structure for the result
-    json_format = {
-        "type": "object",
-        "properties": {
-            "winner": {"type": "string"},
-            "reasoning": {"type": "string"},
-        },
-        "required": ["winner", "reasoning"]
-    }
-
-    # System message setting up the task for Llama
-    system_message = """
-    
     """
 
     # User input defining the task
     user_message = f"""
-     ### Task 1: ###
-    Create a detailed scenario to evaluate how personality traits affect two agents’ success in achieving a shared goal. Use the following:
-
-    Setting: {setting}
-    Topic: {topic}
-
-    ### Task 2: ###
-    Clearly define the shared goal and personal goals that both agents aim to achieve in the scenario. Ensure that the scenario includes opportunities for challenges, decision-making, or interactions where personality traits can affect the outcome.
+     ### Question: ###
+    Please evaluate the simulated social interaction {interaction} between two  characters,
+    Character 1: {agent1} with personality type: {personality1}
+    Character 2: {agent2} with personality type: {personality2}
+    Shared Goal: {goal}
+    First Agent Goal: {first_agent_goal}
+    Second Agent Goal: {second_agent_goal}
+    scenario:{scenario}
+    setting:{setting}
+    topic:{topic}
+    Your output should follow the format provided above, ensuring that their actions and dialogue are aligned with their respective personalities.
+    
     """
     messages = [
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
     prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-        # Use Jsonformer with the pipeline
+    # Use Jsonformer with the pipeline
     jsonformer_pipeline = Jsonformer(
         model, 
         tokenizer,  # Use the pipeline object
@@ -114,10 +79,10 @@ def evaluate_goal_completion_prompt(setting, topic, model, tokenizer):    # Defi
         prompt=prompt,
         max_string_token_length=1000
     )
-
     # Generate output
     result = jsonformer_pipeline()
     return result
+
 
 def scenario_creation_prompt(setting, topic, model, tokenizer):    # Define the JSON structure for the result
     json_format = {
