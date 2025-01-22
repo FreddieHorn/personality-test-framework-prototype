@@ -12,7 +12,7 @@ if __name__ == "__main__":
     MODEL_NAME = "meta-llama/Meta-Llama-3.1-8B-Instruct"
     # Get the current date and time formatted as YYYY-MM-DD_HH-MM
     folder_name = datetime.now().strftime("%Y-%m-%d_%H-%M")
-    os.makedirs(folder_name, exist_ok=True)
+    os.makedirs(f"output/{folder_name}", exist_ok=True)
 
     # CONFIG - move to somewhere pls
     step_0_csv_path = 'baseline.csv'
