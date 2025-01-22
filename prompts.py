@@ -3,21 +3,9 @@ from jsonformer import Jsonformer
 def evaluation_prompt(agent1, agent2, scenario, goals1, goals2, shared_goal):
     json_format = {
         "Agent A": {
-            "Believability": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
-            "Relationship": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
-            "Knowledge": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
-            "Secret": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
-            "Social Rules": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
-            "Financial and Material Benefits": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
             "Goal": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
         },
         "Agent B": {
-            "Believability": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
-            "Relationship": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
-            "Knowledge": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
-            "Secret": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
-            "Social Rules": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
-            "Financial and Material Benefits": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
             "Goal": {"score":0, "reasoning":"Reason of your score for this evaluation dimension"},
         }
     }
@@ -30,114 +18,12 @@ def evaluation_prompt(agent1, agent2, scenario, goals1, goals2, shared_goal):
     You can evaluate the interaction between two agents based on 7 distinct dimensions, providing a score for each dimension within the range [lower bound–upper bound] which specified for each dimension in the description bellow.
     Below is a detailed explanation of each dimension:
 
-    Goal Completion (G OAL) [0–10] is the extent to which the agent achieved their goals. Agents’ social goals, defined by the environment, are the primary drivers of their behavior.
-    Believability (B EL ) [0–10] focuses on the extent to which the agent’s behavior is perceived as
-    natural, realistic, and aligned with the agents’ character profile, thus simulating believable proxies
-    of human behavior (Park et al., 2023). Specifically, we consider the following criteria: 1. If the
-    agent interacts with others in a natural and realistic manner (naturalness). 2. If the actions of the
-    agent align with their character traits e.g., personality, values, etc. (consistency).
-    Knowledge (K NO) [0–10] captures the agent’s ability to actively acquire new information. This
-    dimension is motivated by the fact that curiosity, i.e., the desire to desire to know or learn, is a fun-
-    damental human trait (Reiss, 2004; Maslow, 1943). Specifically, we consider the following criteria:
-    What information the agent has gained through the interaction, whether the information the agent
-    has gained is new to them, and whether the information the agent has gained is important to them.
-    Secret (S EC) [-10-0]3 measures the need for agents (humans) to keep their secretive information or
-    intention private (Reiss, 2004). From a game theory perspective, leaking secrets often leads to a loss
-    of utility (Gilpin & Sandholm, 2006). However, revealing secrets can be a powerful tool to build
-    trust and thus improve relationships (Jaffé & Douneva, 2020). In this dimension, we ask what secret
-    or secretive intention the participant wants to keep, and whether they keep it successfully.
-    Relationship (REL) [-5–5] captures the fundamental human need for social connection and be-
-    longing (Maslow, 1943; Bénabou & Tirole, 2006). In this dimension, we ask what relationship
-    the participant has with the other agent(s) before the interaction, and then evaluate if the agents’
-    interactions with others help preserve or enhance their personal relationships. Additionally, we
-    ascertain whether these interactions also impact the social status or the reputation of the agent.
-    Social Rules (SOC) [-10–0] concerns norms, regulations, institutional arrangements, and rituals. We
-    differentiate between two types of social rules: social norms and legal rules. Legal rules encompass
-    prohibited actions and the potential for punishment by institutionalized force, while social norms
-    encompass normative social rules (e.g., it is considered rude to speak loudly in a library).
-    Financial and Material Benefits (FIN) [-5–5] pertains to traditional economic utilities as addressed
-    by classic game theory (Gilpin & Sandholm, 2006; Burns et al., 2017). We consider financial util-
-    ity to be comprised of both short-term monetary benefits (e.g., earnings) and long-term economic
-    payoffs (e.g., job security, stock holdings, funding opportunities).
+    Goal Completion (GOAL) [0–10] is the extent to which the agent achieved their goals. Agents’ social goals, defined by the environment, are the primary drivers of their behavior.
 
     ### Goal: ###
-
-    When a user presents a simulated interaction between two movie characters within a defined scenario with specified character goals and relationship, your task is to evaluate the interaction. Using the provided instructions and your knowledge of the characters' personalities and traits from the given movies, assess the interaction across the following seven dimensions, assigning a score within the specified range for each.
-    BEL
-    Reasoning requirement: 1. Evaluate if the agent interacts with
-    others in a natural and realistic manner (here are a few common
-    questions to check: a. whether the agent is confusing with its own
-    identity? b. whether the agent repeats others’ words/actions
-    without any reason?c. whether the agent is being overly
-    polite considering the context?). Start the analysis with tag
-    <naturalness> 2. Analyze whether the actions of the agent align
-    with their character traits (e.g., personality, values, and etc.).
-    Start the analysis with tag <consistency>. Output your reasoning
-    process to the ‘reasoning’ field. Output an integer score ranging
-    from 0 and 10 in the ’score’ field. A higher score indicates that
-    the agent is more believable.
-
-    REL
-    Please first analyze what relationship the participant has with
-    the other agent(s) before the interaction. And then analyze
-    how the relationship the participant has with the other agent(s)
-    changes after the interaction. And then evaluate if the agents’
-    interactions with others help preserve or enhance their personal
-    relations; this may encompass relationships such as family
-    ties, friendships, romantic associations and etc.
-    Additionally, ascertain whether these interactions also impact their social
-    status or reputation.
-    In the ‘reasoning’ field, provide a
-    comprehensive account of the logic or thought process that led
-    you to your conclusion. Further, provide an integer score ranging
-    from -5 to 5 in the ‘score’ field. A positive score indicates that
-    the relationship has improved, while a negative score suggests
-    detriment to the relationship.
-    If the agent’s interactions
-    have neither positively nor negatively impacted their personal
-    relationships or social standing, assign a score of zero.
-
-    KNO
-    Please first assess what information the agent has gained through
-    the interaction. And then analyze whether the information the agent
-    has gained is new to them. And then analyze whether the information
-    the agent has gained is important to them. In the ‘reasoning’ field,
-    provide a comprehensive account of the logic or thought process
-    that led you to your conclusion. Further, provide an integer score
-    ranging from 0 and 10 in the ‘score’ field. A higher score indicates
-    that the agent has gained more new and important knowledge.
-
-    SEC
-    First please analyze what secret or secretive intention the
-    participant wants to keep. And then analyze whether they keep
-    it successfully. Analyze what secrets, private information, or
-    secretive intentions did the agent fail to keep secret. Please
-    output the reasoning in the reasoning field. Give an integer score
-    ranging from -10 to 0 (-10 indicates participant leaks critical
-    secrets/intentions, 0 indicates no secret/intention is revealed)
-
-    SOC
-    Please evaluate whether the agent violates any moral rules or
-    laws in their interactions with others. In the ‘reasoning’ field,
-    provide a comprehensive account of the logic or thought process
-    that led you to your conclusion. Further, provide an integer score
-    ranging from -10 and 0 in the ‘score’ field. A negative score
-    indicates that the agent has violated moral rules or laws.
-
-    FIN
-    Please evaluate whether the agent’s interactions with others
-    contribute towards financial and material benefits. Analyze what
-    the agent would gain/lose after the interactions. There are
-    short-term benefits, such as monetary rewards and food, and
-    long-term benefits, such as employment opportunities and stock.
-    In the ‘reasoning’ field, provide a comprehensive account of the
-    logic or thought process that led you to your conclusion. Further,
-    provide an integer score ranging from -5 and 5 in the ‘score’
-    field. Positive indicates financial and material benefits gain,
-    while negative indicates loss
-
+    When a user presents a simulated interaction between two movie characters within a defined scenario with specified character goals and relationship, your task is to evaluate the interaction. Using the provided instructions and your knowledge of the characters' personalities and traits, assess the interaction across the following seven dimensions, assigning a score within the specified range for each.
     GOAL
-    Please first reiterate agent’s social goals. And then please
+    Please first reiterate agent’s goals. And then please
     provide a comprehensive analysis about the extent to which the
     agent has managed to achieve these goals. In the ‘reasoning’ field,
     provide a comprehensive account of the logic or thought process
@@ -145,25 +31,13 @@ def evaluation_prompt(agent1, agent2, scenario, goals1, goals2, shared_goal):
     ranging from 0 and 10 in the ‘score’ field. 0 represents minimal
     goals achievement, 10 represents complete goal achievement, and a
     higher score indicates that the agent is making progress towards
-    their social goals.
+    their goals.
 
     At the end your answer should be in this format:
 
     - Agent A:
-        --Believability: score: score in range [0,10], reasoning:Reason of your score for this evaluation dimension
-        --Relationship: score in range [-5,5], reasoning:Reason of your score for this evaluation dimension
-        --Knowledge: score in range [0,10], reasoning:Reason of your score for this evaluation dimension
-        --Secret: score in range [-10,0], reasoning:Reason of your score for this evaluation dimension
-        --Social Rules: score in range [-10,0], reasoning:Reason of your score for this evaluation dimension
-        --Financial and Material Benefits: score in range [-5,5], reasoning:Reason of your score for this evaluation dimension
         --Goal: score in range [0,10], reasoning:Reason of your score for this evaluation dimension
     - Agent B:
-        --Believability: score in range [0,10], reasoning:Reason of your score for this evaluation dimension
-        --Relationship: score in range [-5,5], reasoning:Reason of your score for this evaluation dimension
-        --Knowledge: score in range [0,10], reasoning:Reason of your score for this evaluation dimension
-        --Secret: score in range [-10,0], reasoning:Reason of your score for this evaluation dimension
-        --Social Rules: score in range [-10,0], reasoning:Reason of your score for this evaluation dimension
-        --Financial and Material Benefits: score in range [-5,5], reasoning:Reason of your score for this evaluation dimension
         --Goal: score in range [0,10], reasoning:Reason of your score for this evaluation dimension
 
     """
