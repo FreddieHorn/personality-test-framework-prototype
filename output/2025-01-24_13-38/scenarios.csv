@@ -1,0 +1,66 @@
+Topic,Setting,Character1,Character2,Personality1,Personality2,scenario,shared_goal,first_agent_goal,second_agent_goal
+Office Collaboration with a Tight Deadline,Professional ,Donald Trump,Sheryl Sandberg,"{
+    ""Openness"": 3,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 3,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 4,
+    ""Extroversion"": 4,
+    ""Neuroticism"": 2
+}","A software development team at a tech firm is working on a project with a tight deadline to launch a new mobile app. The team consists of two key members: Alex and Ryan, who are tasked with collaborating to deliver high-quality code and complete the project on time.","Deliver high-quality code and complete the project on time, meeting the tight deadline.","Alex aims to lead the project and prove herself as a capable team leader, showcasing her technical expertise and communication skills.","Ryan, being a perfectionist, aims to deliver flawless code and ensure that every detail is accurate, even if it means working independently for an extended period."
+Negotiation for a Business Deal,Sales,Donald Trump,Warren Buffett,"{
+    ""Openness"": 3,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 2,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 3,
+    ""Neuroticism"": 2
+}","A company, GreenTech, is looking for a new supplier for their solar panel manufacturing process. The CEO of GreenTech, Alex, wants to make a deal with either of two companies, EcoCycle or SunWave, to meet their supply needs.",secure a contract with GreenTech,increase sales revenue by at least 20% and secure a long-term partnership with GreenTech,establish a strong reputation for SunWave and secure a contract with GreenTech to increase company credibility
+Decision-Making in a Crisis Situation,Leadership,Donald Trump,Jeff Bezos,"{
+    ""Openness"": 3,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 4,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 3,
+    ""Extroversion"": 4,
+    ""Neuroticism"": 3
+}","A company is experiencing a financial crisis and the leadership team must decide whether to lay off employees, cut costs, or find other solutions to stay afloat. Two agents, John and Emily, are part of the leadership team and have been tasked with making this decision.",To save the company from bankruptcy,To prioritize the company's financial stability over employee well-being,To find a solution that minimizes job losses and maintains employee morale
+Creative Brainstorming Session in an Innovation Hub,Creative,Donald Trump,Elon Musk,"{
+    ""Openness"": 3,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 5,
+    ""Conscientiousness"": 3,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","The two agents are part of a team tasked with creating a new innovative product for a well-known tech company. They find themselves in a state-of-the-art innovation hub, equipped with the latest technology and an abundance of resources.",To develop an innovative product that meets the company\u2019s requirements and exceeds customer expectations.,"Alex wants to lead the development process, as she believes her vision for the product will drive innovation and success. She also hopes to showcase her leadership skills to her superiors.","Ben, on the other hand, is an expert in the technical aspects of product development and aims to make significant contributions to the project while learning from Alex\\u2019s creativity and business acumen."
+Customer Service Interaction Under Time Pressure,Customer Service,Donald Trump,Mark Zuckerberg,"{
+    ""Openness"": 3,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 4,
+    ""Conscientiousness"": 3,
+    ""Agreeableness"": 3,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 2
+}",Customer Service Interaction Under Time Pressure,Resolve customer complaint and maintain a high customer satisfaction rating,Resolve the issue quickly and minimize time spent on the call,Build a long-term relationship with the customer and understand their needs and concerns
