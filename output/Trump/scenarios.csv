@@ -1,0 +1,66 @@
+Topic,Setting,Character1,Character2,Personality1,Personality2,scenario,shared_goal,first_agent_goal,second_agent_goal
+Office Collaboration with a Tight Deadline,Professional ,Donald Trump,Sheryl Sandberg,"{
+    ""Openness"": 3,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 3,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 4,
+    ""Extroversion"": 4,
+    ""Neuroticism"": 2
+}",Collaborative Project Launch on a Tight Deadline,Launch the new marketing campaign within the next 48 hours.,Ensure the campaign meets the company’s branding standards and regulations.,Deliver a campaign that exceeds the client\u2019s expectations and generates the highest possible ROI.
+Negotiation for a Business Deal,Sales,Donald Trump,Warren Buffett,"{
+    ""Openness"": 3,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 2,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 3,
+    ""Neuroticism"": 2
+}",The Sales Negotiation,Land a 5-year contract with a large corporation for a software deal worth $10 million.,Close the deal in under 2 hours to meet the sales quota for the quarter and secure a 5% bonus.,Build a long-term relationship with the client and secure a potential add-on deal worth $2 million within the next year.
+Decision-Making in a Crisis Situation,Leadership,Donald Trump,Jeff Bezos,"{
+    ""Openness"": 3,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 4,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 3,
+    ""Extroversion"": 4,
+    ""Neuroticism"": 3
+}",Decision-Making in a Leadership Crisis Situation at a Major Tech Company,Restore order and ensure the company's future success,Maintain a safe working environment for all employees,Prioritize company profits and minimize short-term financial losses
+Creative Brainstorming Session in an Innovation Hub,Creative,Donald Trump,Elon Musk,"{
+    ""Openness"": 3,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 5,
+    ""Conscientiousness"": 3,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}",Creative Brainstorming Session in an Innovation Hub,Develop a successful new product,Increase personal visibility and reputation,Ensure the product is socially responsible
+Customer Service Interaction Under Time Pressure,Customer Service,Donald Trump,Mark Zuckerberg,"{
+    ""Openness"": 3,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 4,
+    ""Conscientiousness"": 3,
+    ""Agreeableness"": 3,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 2
+}","A customer service call center handles a large influx of calls on a busy shopping day, with many customers calling to return or exchange products due to defects or dissatisfaction with their purchases. The agents must handle these calls efficiently while maintaining a positive customer experience, and the agents are under time pressure to resolve the calls within a 5-minute limit.",resolving customer issues within the time limit while maintaining customer satisfaction,meet or exceed customer satisfaction ratings by the end of the week,complete the required number of calls within the allotted time frame and receive a performance bonus
