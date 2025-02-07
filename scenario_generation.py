@@ -16,6 +16,8 @@ def scenario_generation(input_csv: str, output_csv: str, model, tokenizer):
         result = scenario_creation_prompt(
             setting=row["Setting"],
             topic=row["Topic"],
+            agent_1_name = row["Character1"],
+            agent_2_name = row["Character2"],
             model = model,
             tokenizer = tokenizer
         )

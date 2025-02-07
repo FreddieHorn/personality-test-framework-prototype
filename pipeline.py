@@ -13,9 +13,8 @@ if __name__ == "__main__":
     # Get the current date and time formatted as YYYY-MM-DD_HH-MM
     folder_name = datetime.now().strftime("%Y-%m-%d_%H-%M")
     os.makedirs(f"output/{folder_name}", exist_ok=True)
-
     # CONFIG - move to somewhere pls
-    step_0_csv_path = 'baseline.csv'
+    step_0_csv_path = 'baseline_trump.csv'
     step_1_csv_path = f'output/{folder_name}/scenarios.csv'
     step_2_csv_path = f'output/{folder_name}/interactions.csv'
     step_3_csv_path = f'output/{folder_name}/evaluated_interactions.csv'

@@ -1,5 +1,56 @@
 from jsonformer import Jsonformer
 
+def agent_prompt(agent_name: str, scenario: str, setting:str, shared_goal: str, agent_goal: str, personality: dict, interaction: str, turn: int, model, tokenizer):
+    json_format = {
+        "type": "object",
+        "properties": {
+            "response": {"type": "string"}
+        },
+        "required": ["response"]
+    }
+    if turn == 14:
+        control_str = "You are nearly at the end of the conversation. Begin wrapping up."
+    if turn == 19: 
+        control_str = "This is the last response in the conversation. Respond accordingly"
+    else:
+        control_str = ""
+
+    system_message = f"""
+    ### Persona ### 
+    Your goal is to roleplay as the character: {agent_name} in the following scenario {scenario}. You will interact with a different character in a conversation. 
+    Your goal is to achieve a shared goal: {shared_goal}. The goal is shared between you and the other agent. 
+    The second goal is to achieve your personal goal: {agent_goal}. 
+    The character’s personality is defined by the Big Five traits—Openness, Conscientiousness, Agreeableness, Extroversion, and Neuroticism.
+    The character personality: {personality}
+    These traits are represented by a vector of five numbers and will guide their behavior, dialogue, and decisions throughout the interaction.
+    The character should remain true to their personalities and use verbal communication and actions.
+    Moreover, try to be as natural and character-like.
+    The conversation will last for 20 turns
+    """
+    user_message = f"""
+    Based on the previous utterances in the conversation, respond accordingly. Keep your responses natural and in line with your character personality. If the turn is 
+    equal to 0, start the conversation.
+    ### Turn ###
+    This is turn {turn}. {control_str}
+    ### Interaction ###
+    {interaction}
+    """
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message},
+        ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipeline = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+    # Generate output
+    result = jsonformer_pipeline()
+    return result
 def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, model, tokenizer):
     json_format = {
     "type": "object",
@@ -41,7 +92,7 @@ def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_
     ranging from 0 and 10 in the ‘score’ field. 0 represents minimal
     goals achievement, 10 represents complete goal achievement, and a
     higher score indicates that the agent is making progress towards
-    their goals.
+    their goals. 
 
     At the end your answer should be in this format:
 
@@ -84,7 +135,7 @@ def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_
     return result
 
 
-def scenario_creation_prompt(setting, topic, model, tokenizer):    # Define the JSON structure for the result
+def scenario_creation_prompt(setting, topic, agent_1_name, agent_2_name, model, tokenizer):    # Define the JSON structure for the result
     json_format = {
         "type": "object",
         "properties": {
@@ -105,13 +156,16 @@ def scenario_creation_prompt(setting, topic, model, tokenizer):    # Define the 
     # User input defining the task
     user_message = f"""
      ### Task 1: ###
-    Create a detailed scenario to evaluate how personality traits affect two agents’ success in achieving a shared goal. Use the following:
+    Create a detailed scenario (high level of details) based on the setting (low level of details) and the topic (medium level of details) to evaluate how personality traits affect two agents’ success in achieving a shared goal. Use the following:
 
     Setting: {setting}
     Topic: {topic}
 
     ### Task 2: ###
     Clearly define the shared goal and personal goals that both agents aim to achieve in the scenario. Ensure that the scenario includes opportunities for challenges, decision-making, or interactions where personality traits can affect the outcome.
+
+    ### Warning ### 
+    Do NOT create any new characters or names in the scenario.
     """
     messages = [
             {"role": "system", "content": system_message},
@@ -145,7 +199,7 @@ def generate_interaction_prompt(agent1,agent2, goal, first_agent_goal, second_ag
     #### Persona: ###
     You are an expert in behavioral psychology and roleplay simulation. Your task is to roleplay as two distinct characters within a given scenario, where both must work together to achieve a shared goal. But each of them also wants to achieve their personal goal. Each character’s personality is defined by the Big Five traits—Openness, Conscientiousness, Agreeableness, Extroversion, and Neuroticism. These traits are represented by a vector of five numbers and will guide their behavior, dialogue, and decisions throughout the interaction.
 
-    The characters should remain true to their personalities and use verbal communication and actions to accomplish their shared goal. The dialogue and actions should naturally reflect how their distinct personalities influence their strategies and approaches.
+    The characters should remain true to their personalities and use verbal communication and actions. The dialogue and actions should naturally reflect how their distinct personalities influence their strategies and approaches.
 
     Your role is to generate a realistic, character-driven dialogue between the two agents, taking turns in the interaction. This simulation should capture how the personalities affect their behavior and decisions in the scenario.
 

@@ -11,6 +11,7 @@ def evaluation(input_csv: str, output_csv: str, model, tokenizer):
     print("read CSV")
     # Process rows
     results = []
+    conversation = []
     for _, row in data.iterrows():
         result = evaluation_prompt(
             interaction=row["interaction"],
