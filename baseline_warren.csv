@@ -1,0 +1,66 @@
+Topic,Setting,Character1,Character2,Personality1,Personality2
+Office Collaboration with a Tight Deadline,Professional ,Steve Jobs,Warren Buffett,"{
+    ""Openness"": 4,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 3,
+    ""Extroversion"": 4,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 2,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 3,
+    ""Neuroticism"": 2
+}"
+Negotiation for a Business Deal,Sales,Donald Trump,Warren Buffett,"{
+    ""Openness"": 3,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 2,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 3,
+    ""Neuroticism"": 2
+}"
+Decision-Making in a Crisis Situation,Leadership,Elon Musk,Warren Buffett,"{
+    ""Openness"": 5,
+    ""Conscientiousness"": 3,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 2,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 3,
+    ""Neuroticism"": 2
+}"
+Creative Brainstorming Session in an Innovation Hub,Creative,Mark Zuckerberg,Warren Buffett,"{
+    ""Openness"": 4,
+    ""Conscientiousness"": 3,
+    ""Agreeableness"": 3,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 2
+}","{
+    ""Openness"": 2,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 3,
+    ""Neuroticism"": 2
+}"
+Customer Service Interaction Under Time Pressure,Customer Service,Oprah Winfrey,Warren Buffett,"{
+    ""Openness"": 4,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 2,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 3,
+    ""Neuroticism"": 2
+}"

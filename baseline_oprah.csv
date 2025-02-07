@@ -1,0 +1,66 @@
+Topic,Setting,Character1,Character2,Personality1,Personality2
+Office Collaboration with a Tight Deadline,Professional ,Oprah Winfrey,Sheryl Sandberg,"{
+    ""Openness"": 4,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 3,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 4,
+    ""Extroversion"": 4,
+    ""Neuroticism"": 2
+}"
+Negotiation for a Business Deal,Sales,Oprah Winfrey,Warren Buffett,"{
+    ""Openness"": 4,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 2,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 3,
+    ""Neuroticism"": 2
+}"
+Decision-Making in a Crisis Situation,Leadership,Oprah Winfrey,Jeff Bezos,"{
+    ""Openness"": 4,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 4,
+    ""Conscientiousness"": 5,
+    ""Agreeableness"": 3,
+    ""Extroversion"": 4,
+    ""Neuroticism"": 3
+}"
+Creative Brainstorming Session in an Innovation Hub,Creative,Oprah Winfrey,Elon Musk,"{
+    ""Openness"": 4,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 5,
+    ""Conscientiousness"": 3,
+    ""Agreeableness"": 2,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}"
+Customer Service Interaction Under Time Pressure,Customer Service,Oprah Winfrey,Mark Zuckerberg,"{
+    ""Openness"": 4,
+    ""Conscientiousness"": 4,
+    ""Agreeableness"": 5,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 3
+}","{
+    ""Openness"": 4,
+    ""Conscientiousness"": 3,
+    ""Agreeableness"": 3,
+    ""Extroversion"": 5,
+    ""Neuroticism"": 2
+}"
