@@ -6,7 +6,7 @@ import pandas as pd
 # from environment import Agent, AgentInteraction
 from prompts import scenario_creation_prompt
 
-def scenario_generation(input_csv: str, output_csv: str, model, tokenizer):
+def scenario_generation(input_csv: str, output_csv: str,  model, tokenizer, temperature = 1):
     # Load the input data
     data = pd.read_csv(input_csv)
 
@@ -18,6 +18,7 @@ def scenario_generation(input_csv: str, output_csv: str, model, tokenizer):
             topic=row["Topic"],
             agent_1_name = row["Character1"],
             agent_2_name = row["Character2"],
+            temperature = temperature,
             model = model,
             tokenizer = tokenizer
         )

@@ -75,10 +75,10 @@ def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_
     # System message setting up the task for Llama
     system_message = """
     #### Persona: ###
-    You are an expert in behavioral psychology and personality analysis. You can evaluate the interaction between two agents based on 7 distinct dimensions, providing a score for each dimension within the range [lower bound–upper bound] which specified for each dimension in the description bellow.
+    You are an expert in behavioral psychology and personality analysis. You can evaluate the interaction between two agents, providing a score [lower bound–upper bound] which is specified in the description bellow.
     Below is a detailed explanation of each dimension:
 
-    Goal Completion (GOAL) [0–10] is the extent to which the agent achieved their goals. Agents’ social goals, defined by the environment, are the primary drivers of their behavior.
+    Goal Completion (GOAL) [0–10] is the extent to which the agent achieved their shared and personal goals.
     ### Goal: ###
 
     When a user presents a simulated interaction between two characters with specific personality types, given as vectors, within a defined scenario with specified shared character goals and also personal character goals, your task is to evaluate the interaction. Assess the interaction across the following seven dimensions, assigning a score within the specified range for each.
@@ -135,7 +135,7 @@ def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_
     return result
 
 
-def scenario_creation_prompt(setting, topic, agent_1_name, agent_2_name, model, tokenizer):    # Define the JSON structure for the result
+def scenario_creation_prompt(setting, topic, agent_1_name, agent_2_name, temperature, model, tokenizer):    # Define the JSON structure for the result
     json_format = {
         "type": "object",
         "properties": {
@@ -156,23 +156,28 @@ def scenario_creation_prompt(setting, topic, agent_1_name, agent_2_name, model, 
     # User input defining the task
     user_message = f"""
      ### Task 1: ###
-    Create a detailed scenario (high level of details) based on the setting (low level of details) and the topic (medium level of details) to evaluate how personality traits affect two agents’ success in achieving a shared goal. Use the following:
+    Create a detailed scenario (short story with high level of details) based on the setting (low level of details) in the topic of (medium level of details) to evaluate how personality traits affect two agents’ success in achieving a shared goal. Use the following:
 
     Setting: {setting}
     Topic: {topic}
 
+    ### Scenario difficulty ###
+    Based on the temprature level, adjust the difficulty of the scenario. Temprature can range from 1 to 5, 1 representing the easiest scenario, 5 representing the most difficult one.
+    Difficult scenarios often contain situations where compromise is hard to reach, are designed to pit characters against each other, or present difficult dillemas.
+    Easy scenarios on the other hand, are relatively comfortable for the agents to behave in. Think of them as "normal" scenarios where there are few to none obstacles. 
+    Temprature level: {temperature}
     ### Task 2: ###
     Clearly define the shared goal and personal goals that both agents aim to achieve in the scenario. Ensure that the scenario includes opportunities for challenges, decision-making, or interactions where personality traits can affect the outcome.
-
+    Depending on the temprature level, personal goal of the agents will differ. 
     ### Warning ### 
-    Do NOT create any new characters or names in the scenario.
+    DONT USE ANY NAMES IN THE SCENARIO. INSTEAD USE THE WORD "AGENT 1, 2" etc.
     """
     messages = [
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
     prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-        # Use Jsonformer with the pipeline
+    # Use Jsonformer with the pipeline
     jsonformer_pipeline = Jsonformer(
         model, 
         tokenizer,  # Use the pipeline object
