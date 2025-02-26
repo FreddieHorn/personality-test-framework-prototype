@@ -14,7 +14,7 @@ if __name__ == "__main__":
     folder_name = datetime.now().strftime("%Y-%m-%d_%H-%M")
     os.makedirs(f"output/{folder_name}", exist_ok=True)
     # CONFIG - move to somewhere pls
-    step_0_csv_path = 'baseline_oprah.csv'
+    step_0_csv_path = 'baseline_trump.csv'
     step_1_csv_path = f'output/{folder_name}/scenarios.csv'
     step_2_csv_path = f'output/{folder_name}/interactions.csv'
     step_3_csv_path = f'output/{folder_name}/evaluated_interactions.csv'
@@ -34,6 +34,6 @@ if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
     print("models declared")
-    scenario_generation(step_0_csv_path, step_1_csv_path, model, tokenizer, temperature = 1)
+    scenario_generation(step_0_csv_path, step_1_csv_path, model, tokenizer, temperature = 5)
     generate_interaction(step_1_csv_path, step_2_csv_path, model, tokenizer)
     evaluation(step_2_csv_path, step_3_csv_path, model, tokenizer)
