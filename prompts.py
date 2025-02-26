@@ -265,3 +265,63 @@ def generate_interaction_prompt(agent1,agent2, goal, first_agent_goal, second_ag
     # Generate output
     result = jsonformer_pipeline()
     return result
+
+def goal_completion_rate_prompt(interaction, previous_scores, agent1, agent2, shared_goal, first_agent_goal, second_agent_goal, scenario, model, tokenizer):
+    print("in the prompt")
+    json_format = {
+        "type": "object",
+        "properties": {
+            "shared_goal_completion_rate": {"type": "number"},
+            "first_agent_goal_completion_rate" : {"type" : "number"},
+            "second_agent_goal_completion_rate" : {"type" : "number"}
+        },
+        "required": ["shared_goal_completion_rate", "first_agent_goal_completion_rate", "second_agent_goal_completion_rate"]
+    }
+    system_message = f"""
+    ### PERSONA: ###
+    You are a system tasked with rating the goal completion level for the agents who act in a following scenario: {scenario}. 
+    Your task is to analise the interaction between two agents and rate to which extent have the agents completed their respective goals as well as their shared goal. 
+    The score is an integer between 0 (agent(s) did not do anything to achieve the goal) and 10 (agent(s) completed his goal). Mind that a scores cannot be lower that the one given in the previous assesments (but can be the same).
+    There are two agents. 
+    Here's the configuration for them:
+    
+    Agent 1 name - {agent1}
+    Agent 1 personal goal - {first_agent_goal}
+
+    Agent 2 name - {agent2}
+    Agent 2 personal goal - {second_agent_goal}
+
+    There's also a shared goal that BOTH agents want to achieve {shared_goal}.
+
+    Use the following json format: {json_format}
+    """
+    user_message = f"""
+    ### Last scores ###
+    previous_agent1_goal_completion_score = {previous_scores[0]}
+    previous_agent2_goal_completion_score = {previous_scores[1]}
+    previous_shared_goal_completion_score = {previous_scores[2]}
+    ### Task ###
+    Based on the interaction below, please rate to which extent have the agents completed their goals as well as their shared goal:
+    {interaction}
+    """
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message},
+    ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    print("applied message")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipelinew = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+    print("declared former")
+    # Generate output
+    result = jsonformer_pipelinew()
+    print("after pipeline")
+    return result
+
+
