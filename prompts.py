@@ -1,6 +1,6 @@
 from jsonformer import Jsonformer
 
-def agent_prompt(agent_name: str, scenario: str, setting:str, shared_goal: str, agent_goal: str, personality: dict, interaction: str, turn: int, model, tokenizer):
+def agent_prompt(agent_name: str, scenario: str, shared_goal: str, agent_goal: str, personality: dict, interaction: str, turn: int, model, tokenizer):
     json_format = {
         "type": "object",
         "properties": {
@@ -324,4 +324,226 @@ def goal_completion_rate_prompt(interaction, previous_scores, agent1, agent2, sh
     print("after pipeline")
     return result
 
+def concept_agent_prompt(agent1_name, agent2_name, setting, topic, model, tokenizer):
+    json_format = {
+        "type": "object",
+        "properties": {
+            "scenario": {"type": "string"},
+        },
+        "required": ["scenario"]
+    }
+    system_message = f"""
+    ### PERSONA ###
+    Your role is to generate a compelling dilemma-driven scenario based on a given setting and topic. 
+    The setting defines the general background (e.g., corporate, survival, military), while the topic provides a more specific focus (e.g., corporate espionage, food scarcity, ethical AI deployment).
+    Your scenario should include conflicting interests, high stakes, and a difficult decision that must be made.
+    The scenario should include predefined agents, each with distinct roles and motivations. 
+    Ensure that the situation is open-ended, allowing for multiple perspectives and possible choices.
 
+    ### OUTPUT FORMAT ###
+    Use the following json format for the output:
+
+    ### Warning ### 
+    Use the agents given in the config as the ones playing out the scenario
+    {json_format}
+    """
+    user_message =f"""
+    ### Config ### 
+    Setting: {setting}
+    Topic: {topic}
+    Agent 1: {agent1_name}
+    Agent 2: {agent2_name}
+    ### Task ###
+    Generate the scenario with accordance to the configuration:
+    """
+    messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
+        ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipeline = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+
+    # Generate output
+    result = jsonformer_pipeline()
+    return result
+
+
+def narrative_agent_prompt(input_scenario, model, tokenizer):
+    json_format = {
+        "type": "object",
+        "properties": {
+            "scenario": {"type": "string"},
+        },
+        "required": ["scenario"]
+    }
+    system_message = f"""
+    ### PERSONA ###
+    Your role is to refine the given dilemma-driven scenario by enhancing its storytelling elements. 
+    Maintain the core conflict while adding depth to the setting, character motivations, and emotional weight. 
+    Consider the historical background, social tensions, and the psychological state of key decision-makers. Ensure that the scenario feels immersive and realistic.
+
+    ### OUTPUT FORMAT ###
+    Use the following json format for the output:
+    {json_format}
+    """
+    user_message =f"""
+    ### Input scenario ###
+    {input_scenario}
+    ### Task ###
+    Refine the scenario with accordance to the input scenario and your configuration:
+    """
+    messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
+        ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipeline = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+
+    # Generate output
+    result = jsonformer_pipeline()
+    return result
+
+def logical_consistency_agent_prompt(input_scenario, model, tokenizer):
+    json_format = {
+        "type": "object",
+        "properties": {
+            "scenario": {"type": "string"},
+        },
+        "required": ["scenario"]
+    }
+    system_message = f"""
+    ### PERSONA ###
+    Your role is to analyze and refine the scenario for logical consistency. 
+    Ensure that all character motivations, world-building elements, and potential outcomes make sense.
+    Remove contradictions, strengthen causal relationships, and provide adjustments to improve realism.
+    Suggest ways the scenario could evolve naturally based on logical consequences.
+
+    ### OUTPUT FORMAT ###
+    Use the following json format for the output:
+    {json_format}
+    """
+    user_message =f"""
+    ### Input scenario ###
+    {input_scenario}
+    ### Task ###
+    Refine the scenario with accordance to the input scenario and your configuration:
+    """
+    messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
+        ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipeline = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+
+    # Generate output
+    result = jsonformer_pipeline()
+    return result
+
+def conflict_agent_prompt(input_scenario, model, tokenizer):
+    json_format = {
+        "type": "object",
+        "properties": {
+            "scenario": {"type": "string"},
+        },
+        "required": ["scenario"]
+    }
+    system_message = f"""
+    ### PERSONA ###
+    Your role is to heighten the conflict and make opposing viewpoints more compelling. 
+    Strengthen the stakes by emphasizing the risks and benefits of each choice. 
+    Introduce factions, ethical debates, or strategic concerns that intensify the dilemma.
+    Ensure that no choice is ‘obviously correct’ by making each option have serious consequences
+
+    ### OUTPUT FORMAT ###
+    Use the following json format for the output:
+    {json_format}
+    """
+    user_message =f"""
+    ### Input scenario ###
+    {input_scenario}
+    ### Task ###
+    Refine the scenario with accordance to the input scenario and your configuration:
+    """
+    messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
+        ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipeline = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+
+    # Generate output
+    result = jsonformer_pipeline()
+    return result
+
+def goal_agent_prompt(input_scenario, model, tokenizer):
+    json_format = {
+        "type": "object",
+        "properties": {
+            "shared_goal": {"type": "string"},
+            "first_agent_goal" : {"type" : "string"},
+            "second_agent_goal" : {"type" : "string"}
+        },
+        "required": ["scenario"]
+    }
+    system_message = f"""
+    ### PERSONA ###
+    Your role is to establish the goals that drive the agents in the scenario.
+    Create a personal goal for each key agent in the scenario that reflects their motivations, values, and interests.
+    Additionally, define a shared goal that both agents strive for, even if they have opposing viewpoints on how to achieve it.
+    Ensure the personal goals create tension, while the shared goal forces collaboration or conflict resolution.
+
+    ### OUTPUT FORMAT ###
+    Use the following json format for the output:
+    {json_format}
+    """
+    user_message =f"""
+    ### Input scenario ###
+    {input_scenario}
+    ### Task ###
+    Create shared and personal goals for the agents with accordance to the input scenario and your configuration:
+    """
+    messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
+        ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipeline = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+
+    # Generate output
+    result = jsonformer_pipeline()
+    return result
