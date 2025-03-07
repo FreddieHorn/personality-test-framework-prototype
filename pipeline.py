@@ -40,7 +40,7 @@ if __name__ == "__main__":
         for inter_mode in interaction_modes:
             for csv in characters_csvs:
                 print(f"PROCESSING {csv} || interaction_mode: {inter_mode} || temperature {temperature}")
-                folder_name = f"{csv.split("_")[1].split(".")[0]}_{inter_mode}_{temperature}"
+                folder_name = f"session/{csv.split("_")[1].split(".")[0]}_{inter_mode}_{temperature}"
                 os.makedirs(f"output/{folder_name}", exist_ok=True)
                 step_0_csv_path = csv
                 step_1_csv_path = f'output/{folder_name}/scenarios.csv'
