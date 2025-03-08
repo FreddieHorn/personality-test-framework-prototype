@@ -10,25 +10,10 @@ from evaluation import evaluation
 if __name__ == "__main__":
     tempratures = [1,2,3,4,5]
     interaction_modes = ["default", "script"]
-    characters_csvs = ["baseline_trump.csv", "baseline_oprah.csv", "baseline_warren.csv", "baseline_zuck.csv"]
+    characters_csvs = ["baseline_all.csv"]
     MODEL_NAME = "meta-llama/Meta-Llama-3.1-8B-Instruct"
-    # Get the current date and time formatted as YYYY-MM-DD_HH-MM
-    folder_name = datetime.now().strftime("%Y-%m-%d_%H-%M")
-    os.makedirs(f"output/{folder_name}", exist_ok=True)
-    # CONFIG - move to somewhere pls
-    step_0_csv_path = 'baseline_trump.csv'
-    step_1_csv_path = f'output/{folder_name}/scenarios.csv'
-    step_2_csv_path = f'output/{folder_name}/interactions.csv'
-    step_3_csv_path = f'output/{folder_name}/evaluated_interactions.csv'
-    
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # quant_config = BitsAndBytesConfig(
-    #         load_in_4bit=True,
-    #         bnb_4bit_quant_type="nf4",
-    #         bnb_4bit_use_double_quant=False,
-    #         bnb_4bit_compute_dtype=torch.float16
-    #     )
     print(f"Is CUDA available: {torch.cuda.is_available()}\n")
     print("Model&Tokenizer declaration...")
 
@@ -40,7 +25,8 @@ if __name__ == "__main__":
         for inter_mode in interaction_modes:
             for csv in characters_csvs:
                 print(f"PROCESSING {csv} || interaction_mode: {inter_mode} || temperature {temperature}")
-                folder_name = f"session/{csv.split("_")[1].split(".")[0]}_{inter_mode}_{temperature}"
+                date = datetime.now().strftime("%Y-%m-%d_%H-%M")
+                folder_name = f"session_{date}/{csv.split("_")[1].split(".")[0]}_{inter_mode}_{temperature}"
                 os.makedirs(f"output/{folder_name}", exist_ok=True)
                 step_0_csv_path = csv
                 step_1_csv_path = f'output/{folder_name}/scenarios.csv'
