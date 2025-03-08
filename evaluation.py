@@ -11,6 +11,9 @@ def evaluation(input_csv: str, output_csv: str, model, tokenizer):
     print("read CSV")
     # Process rows
     results = []
+    conversation = []
+    scores_agent_1 = []
+    scores_agent_2 = []
     for _, row in data.iterrows():
         result = evaluation_prompt(
             interaction=row["interaction"],
@@ -27,15 +30,19 @@ def evaluation(input_csv: str, output_csv: str, model, tokenizer):
             model = model,
             tokenizer = tokenizer
         )
+        scores_agent_1.append(float(result["Agent A"]["Goal"]["score"]))
+        scores_agent_2.append(float(result["Agent B"]["Goal"]["score"]))
         results.append(result)
         print(result) 
      # Save results
     data["Character 1 evaluation"] = [result.get("Agent A", "") for result in results]
     data["Character 2 evaluation"] = [result.get("Agent B", "") for result in results]
+
+    print(f"Average Score for agent 1: {sum(scores_agent_1)/ len(scores_agent_1)}")
+    print(f"Average Score for agent 2: {sum(scores_agent_2)/ len(scores_agent_2)}")
     
     data.to_csv(output_csv, index=False)
     print(f"Results saved to {output_csv}")
 
-
 if __name__ == "__main__":
-    main()
+    evaluation()

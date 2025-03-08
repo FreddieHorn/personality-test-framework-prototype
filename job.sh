@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=A100medium
-#SBATCH --time=00:40:00
+#SBATCH --time=24:00:00
 #SBATCH --gpus=1
 #SBATCH --ntasks=1
 module load Python
