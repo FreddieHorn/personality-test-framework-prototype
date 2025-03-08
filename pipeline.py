@@ -11,7 +11,7 @@ if __name__ == "__main__":
     tempratures = [1,2,3,4,5]
     interaction_modes = ["default", "script"]
     characters_csvs = ["baseline_all.csv"]
-    MODEL_NAME = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+    MODEL_NAME = "meta-llama/Meta-Llama-3.1-70B-Instruct"
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Is CUDA available: {torch.cuda.is_available()}\n")
