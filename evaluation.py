@@ -1,17 +1,12 @@
-import torch
-import json
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import pandas as pd
-from jsonformer import Jsonformer
 from prompts import evaluation_prompt
 
-def evaluation(input_csv: str, output_csv: str, model, tokenizer):
+def evaluation(input_csv: str, output_csv: str):
     # Load the input data
     data = pd.read_csv(input_csv)
     print("read CSV")
     # Process rows
     results = []
-    conversation = []
     scores_agent_1 = []
     scores_agent_2 = []
     for _, row in data.iterrows():
@@ -27,11 +22,12 @@ def evaluation(input_csv: str, output_csv: str, model, tokenizer):
             personality2=row["Personality2"],
             setting = row["Setting"],
             topic=row["Topic"],
-            model = model,
-            tokenizer = tokenizer
         )
-        scores_agent_1.append(float(result["Agent A"]["Goal"]["score"]))
-        scores_agent_2.append(float(result["Agent B"]["Goal"]["score"]))
+        try:
+            scores_agent_1.append(float(result["Agent A"]["Goal"]["score"]))
+            scores_agent_2.append(float(result["Agent B"]["Goal"]["score"]))
+        except ValueError:
+            print("Error in the conversion of the score, count the score manually")
         results.append(result)
         print(result) 
      # Save results

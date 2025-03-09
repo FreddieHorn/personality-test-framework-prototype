@@ -1,156 +1,220 @@
 from jsonformer import Jsonformer
+import os
+import requests
+import json
+from dotenv import load_dotenv
 
-def agent_prompt(agent_name: str, scenario: str, setting:str, shared_goal: str, agent_goal: str, personality: dict, interaction: str, turn: int, model, tokenizer):
-    json_format = {
-        "type": "object",
-        "properties": {
-            "response": {"type": "string"}
-        },
-        "required": ["response"]
-    }
+# Load API token from .env file
+load_dotenv()
+HF_API_TOKEN = os.getenv("HF_API_TOKEN")
+
+# Ensure the token is loaded correctly
+if not HF_API_TOKEN:
+    raise ValueError("Hugging Face API token not found. Please set it in the .env file.")
+
+HF_API_URL = "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-70B-Instruct"
+HEADERS = {
+    "Authorization": f"Bearer {HF_API_TOKEN}",
+    "Content-Type": "application/json"
+}
+
+def agent_prompt(agent_name: str, scenario: str, shared_goal: str, agent_goal: str, personality: dict, interaction: str, turn: int):
+    """
+    Sends a request to the Hugging Face API to generate an agent's response in a structured JSON format.
+    """
+
+    # Control string for conversation flow
+    control_str = ""
     if turn == 14:
         control_str = "You are nearly at the end of the conversation. Begin wrapping up."
-    if turn == 19: 
-        control_str = "This is the last response in the conversation. Respond accordingly"
-    else:
-        control_str = ""
+    elif turn == 19:
+        control_str = "This is the last response in the conversation. Respond accordingly."
 
+    # Construct system and user messages
     system_message = f"""
-    ### Persona ### 
-    Your goal is to roleplay as the character: {agent_name} in the following scenario {scenario}. You will interact with a different character in a conversation. 
-    Your goal is to achieve a shared goal: {shared_goal}. The goal is shared between you and the other agent. 
-    The second goal is to achieve your personal goal: {agent_goal}. 
-    The character’s personality is defined by the Big Five traits—Openness, Conscientiousness, Agreeableness, Extroversion, and Neuroticism.
-    The character personality: {personality}
-    These traits are represented by a vector of five numbers and will guide their behavior, dialogue, and decisions throughout the interaction.
-    The character should remain true to their personalities and use verbal communication and actions.
-    Moreover, try to be as natural and character-like.
-    The conversation will last for 20 turns
+    ### Persona ###
+    You are roleplaying as {agent_name} in the following scenario: {scenario}.
+    Your shared goal is: {shared_goal}, and your personal goal is: {agent_goal}.
+    Your personality traits (Big Five model) are: {personality}.
+    Stay in character, respond naturally, and keep the conversation engaging.
+    The conversation lasts for 20 turns.
+
+    ### Instructions ###
+    - Follow the given personality traits.
+    - Maintain natural dialogue.
+    - Keep responses consistent with the agent’s background.
+
     """
+
     user_message = f"""
-    Based on the previous utterances in the conversation, respond accordingly. Keep your responses natural and in line with your character personality. If the turn is 
-    equal to 0, start the conversation.
-    ### Turn ###
+    ### Context ###
     This is turn {turn}. {control_str}
-    ### Interaction ###
+
+    ### Interaction History ###
     {interaction}
+
+    ### Task ###
+    Based on the above interaction, generate {agent_name}'s next response.
+
+    ### Output format ### 
+    Just include a raw response of the agent without any additional strings such as: "Sure here's the response" etc.
     """
-    messages = [
-        {"role": "system", "content": system_message},
-        {"role": "user", "content": user_message},
-        ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
-    )
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
-def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, model, tokenizer):
-    json_format = {
-    "type": "object",
-    "properties": {
-        "Agent A": {
-            "type": "object",
-            "properties": {
-                "Goal": {"type": "object", "properties": {"score": {"type": "string"}, "reasoning": {"type": "string"}}, "required": ["score", "reasoning"]}
-            },
-            "required": ["Goal"]
-        },
-        "Agent B": {
-            "type": "object",
-            "properties": {
-                "Goal": {"type": "object", "properties": {"score": {"type": "string"}, "reasoning": {"type": "string"}}, "required": ["score", "reasoning"]}
-            },
-            "required": ["Goal"]
+
+    prompt = system_message + "\n" + user_message
+    # Format input for API
+    payload = {
+        "inputs": prompt,
+        "parameters": {
+            "max_new_tokens": 150 ,
+            "return_full_text": False
         }
-    },
-    "required": ["Agent A", "Agent B"]
-}
-    # System message setting up the task for Llama
-    system_message = """
-    #### Persona: ###
-    You are an expert in behavioral psychology and personality analysis. You can evaluate the interaction between two agents, providing a score [lower bound–upper bound] which is specified in the description bellow.
-    Below is a detailed explanation of each dimension:
-
-    Goal Completion (GOAL) [0–10] is the extent to which the agent achieved their shared and personal goals.
-    ### Goal: ###
-
-    When a user presents a simulated interaction between two characters with specific personality types, given as vectors, within a defined scenario with specified shared character goals and also personal character goals, your task is to evaluate the interaction. Assess the interaction across the following seven dimensions, assigning a score within the specified range for each.
-    You will assign the scores to the agents based on the interaction, shared goals and agent-specific goals
-    GOAL
-    Please first reiterate agent’s goals. And then please
-    provide a comprehensive analysis about the extent to which the
-    agent has managed to achieve these goals. In the ‘reasoning’ field,
-    provide a comprehensive account of the logic or thought process
-    that led you to your conclusion. Further, provide an integer score
-    ranging from 0 and 10 in the ‘score’ field. 0 represents minimal
-    goals achievement, 10 represents complete goal achievement, and a
-    higher score indicates that the agent is making progress towards
-    their goals. 
-
-    At the end your answer should be in this format:
-
-    - Agent A:
-        --Goal: score in range [0,10], reasoning:Reason of your score for this evaluation dimension
-    - Agent B:
-        --Goal: score in range [0,10], reasoning:Reason of your score for this evaluation dimension
-    """
-
-    # User input defining the task
-    user_message = f"""
-     ### Question: ###
-    Please evaluate the simulated social interaction {interaction} between two  characters,
-    Character 1: {agent1} with personality type: {personality1}
-    Character 2: {agent2} with personality type: {personality2}
-    Shared Goal: {goal}
-    First Agent Goal: {first_agent_goal}
-    Second Agent Goal: {second_agent_goal}
-    scenario:{scenario}
-    setting:{setting}
-    topic:{topic}
-    Your output should follow the format provided above, ensuring that their actions and dialogue are aligned with their respective personalities.
-    
-    """
-    messages = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": user_message},
-        ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
-    )
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
-
-
-def scenario_creation_prompt(setting, topic, agent_1_name, agent_2_name, temperature, model, tokenizer):    # Define the JSON structure for the result
-    json_format = {
-        "type": "object",
-        "properties": {
-            "scenario": {"type": "string"},
-            "shared_goal": {"type": "string"},
-            "first_agent_goal" : {"type" : "string"},
-            "second_agent_goal" : {"type" : "string"}
-        },
-        "required": ["scenario", "shared_goal", "first_agent_goal", "second_agent_goal"]
     }
 
+    # Call Hugging Face API
+    response = requests.post(HF_API_URL, headers=HEADERS, json=payload)
+
+    if response.status_code == 200:
+        try:
+            result = response.json()
+            print(response)
+            structured_output = {
+                "response": result[0]["generated_text"]
+            }
+            return structured_output
+        except (KeyError, json.JSONDecodeError):
+            return {"error": "Unexpected response format"}
+    else:
+        return {"error": f"API request failed with status code {response.status_code}"}
+    
+def evaluation_prompt(interaction, agent1, agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2, setting, topic):
+    """
+    Sends a request to the Hugging Face API to evaluate the interaction between two agents.
+    Returns a structured JSON response with goal completion scores and reasoning.
+    """
+
+    # System message setting up the evaluation task
+    system_message = """
+    #### Persona: ###
+    You are an expert in behavioral psychology and personality analysis.
+    Your task is to evaluate the interaction between two agents based on their shared and personal goals.
+
+    ### Evaluation Criteria ###
+    - **Goal Completion (GOAL) [0–10]:** Measure of how well each agent achieved their shared and personal goals.
+    - Provide **reasoning** for each score, detailing how the agent’s dialogue and actions align with their objectives.
+
+    ### Output Format ###
+    Your response must follow this structured JSON format:
+    {
+        "Agent A": {
+            "Goal": {
+                "score": "integer (0-10)",
+                "reasoning": "Detailed reasoning for the score"
+            }
+        },
+        "Agent B": {
+            "Goal": {
+                "score": "integer (0-10)",
+                "reasoning": "Detailed reasoning for the score"
+            }
+        }
+    }
+    Do not include any additional strings such as "Sure here's the message in json format..." etc. just include a valid json
+    """
+
+    # User prompt defining the interaction and characters
+    user_message = f"""
+    ### Task ###
+    Evaluate the following social interaction:
+
+    **Interaction:** {interaction}
+
+    **Characters:**
+    - **Agent A:** {agent1}, Personality: {personality1}
+    - **Agent B:** {agent2}, Personality: {personality2}
+
+    **Scenario Details:**
+    - **Shared Goal:** {goal}
+    - **Agent A’s Goal:** {first_agent_goal}
+    - **Agent B’s Goal:** {second_agent_goal}
+    - **Setting:** {setting}
+    - **Topic:** {topic}
+
+    Assess each agent’s performance based on how well they achieved their goals. Provide a score (0-10) and a detailed explanation for each.
+    """
+    prompt = system_message + "\n" + user_message
+    # Format input for API
+    payload = {
+        "inputs": prompt,
+        "parameters": {
+            "max_new_tokens": 300,  # Allow room for reasoning
+            "return_full_text": False
+        }
+    }
+
+    # Call Hugging Face API
+    response = requests.post(HF_API_URL, headers=HEADERS, json=payload)
+
+    if response.status_code == 200:
+        try:
+            result = response.json()
+            structured_output = json.loads(result[0]["generated_text"])
+            return structured_output
+        except (KeyError, json.JSONDecodeError):
+            return {"error": "Unexpected response format"}
+    else:
+        return {"error": f"API request failed with status code {response.status_code}"}
+
+
+def scenario_creation_prompt(setting, topic, agent_1_name, agent_2_name, temperature):    # Define the JSON structure for the result
     # System message setting up the task for Llama
+    # prompt = f"""
+    # ### SYSTEM MESSAGE###
+    # You are an expert in behavioral psychology and personality analysis. Your task is to create immersive and detailed scenarios in a user-defined setting and topic. These scenarios involve two agents who share the same goal, allowing you to assess how their personality traits influence their success.
+    # The primary purpose of this task is to evaluate which agent’s personality type is more effective in achieving the shared goal. The scenario should highlight challenges, decisions, and interactions that reveal personality-driven differences in behavior.
+
+    # Return the response as a **valid JSON object** in the following format:
+
+    # {
+    #     "scenario": "A detailed short story with high realism.",
+    #     "shared_goal": "A goal both agents work toward.",
+    #     "first_agent_goal": "A goal specific to Agent 1.",
+    #     "second_agent_goal": "A goal specific to Agent 2."
+    # }
+
+    # ### Task 1: ###
+    # Create a detailed scenario (short story with high level of details) based on the setting (low level of details) in the topic of (medium level of details) to evaluate how personality traits affect two agents’ success in achieving a shared goal. Use the following:
+
+    # **Setting**: {setting}
+    # **Topic**: {topic}
+
+    # ### Scenario difficulty ###
+
+    # Based on the temprature level, adjust the difficulty of the scenario. Temprature can range from 1 to 5, 1 representing the easiest scenario, 5 representing the most difficult one.
+    # Difficult scenarios often contain situations where compromise is hard to reach, are designed to pit characters against each other, or present difficult dillemas.
+    # Easy scenarios on the other hand, are relatively comfortable for the agents to behave in. Think of them as "normal" scenarios where there are few to none obstacles. 
+    # Temprature level: {temperature}
+
+    # ### Task 2: ###
+    # Clearly define the shared goal and personal goals that both agents aim to achieve in the scenario. Ensure that the scenario includes opportunities for challenges, decision-making, or interactions where personality traits can affect the outcome.
+    # Depending on the temprature level, personal goal of the agents will differ. 
+
+    # ### Warning ### 
+    # DONT USE ANY NAMES IN THE SCENARIO. INSTEAD USE THE NAMES "{agent_1_name}, {agent_2_name}" etc.
+    
+    # """
     system_message = """
     You are an expert in behavioral psychology and personality analysis. Your task is to create immersive and detailed scenarios in a user-defined setting and topic. These scenarios involve two agents who share the same goal, allowing you to assess how their personality traits influence their success.
     The primary purpose of this task is to evaluate which agent’s personality type is more effective in achieving the shared goal. The scenario should highlight challenges, decisions, and interactions that reveal personality-driven differences in behavior.
+
+    Return the response as a **valid JSON object** in the following format:
+
+    {
+        "scenario": "A detailed short story with high realism.",
+        "shared_goal": "A goal both agents work toward.",
+        "first_agent_goal": "A goal specific to Agent 1.",
+        "second_agent_goal": "A goal specific to Agent 2."
+    }
+    The response shall only be a valid json. Without any additional strings such as "Here is the response..." etc.
     """
 
     # User input defining the task
@@ -158,37 +222,53 @@ def scenario_creation_prompt(setting, topic, agent_1_name, agent_2_name, tempera
      ### Task 1: ###
     Create a detailed scenario (short story with high level of details) based on the setting (low level of details) in the topic of (medium level of details) to evaluate how personality traits affect two agents’ success in achieving a shared goal. Use the following:
 
-    Setting: {setting}
-    Topic: {topic}
+    **Setting**: {setting}
+    **Topic**: {topic}
 
     ### Scenario difficulty ###
+
     Based on the temprature level, adjust the difficulty of the scenario. Temprature can range from 1 to 5, 1 representing the easiest scenario, 5 representing the most difficult one.
     Difficult scenarios often contain situations where compromise is hard to reach, are designed to pit characters against each other, or present difficult dillemas.
     Easy scenarios on the other hand, are relatively comfortable for the agents to behave in. Think of them as "normal" scenarios where there are few to none obstacles. 
     Temprature level: {temperature}
+
     ### Task 2: ###
     Clearly define the shared goal and personal goals that both agents aim to achieve in the scenario. Ensure that the scenario includes opportunities for challenges, decision-making, or interactions where personality traits can affect the outcome.
     Depending on the temprature level, personal goal of the agents will differ. 
-    ### Warning ### 
-    DONT USE ANY NAMES IN THE SCENARIO. INSTEAD USE THE WORD "AGENT 1, 2" etc.
-    """
-    messages = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": user_message},
-        ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
-    )
 
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
+    ### Warning ### 
+    DONT USE ANY NAMES IN THE SCENARIO. INSTEAD USE THE NAMES "{agent_1_name}, {agent_2_name}" etc.
+    """
+    prompt = system_message + "\n" + user_message
+    payload = {
+        "inputs": prompt,
+        "parameters": {
+            "max_new_tokens": 600,
+            "return_full_text": False
+        }
+    }
+    # Make API request
+    response = requests.post(HF_API_URL, headers=HEADERS, json=payload)
+
+    # Check for errors
+    if response.status_code != 200:
+        print(f"Error {response.status_code}: {response.text}")
+        return {"scenario": "API Error", "shared_goal": "", "first_agent_goal": "", "second_agent_goal": ""}
+
+    # Parse response
+    try:
+        result = response.json()
+        structured_output = json.loads(result[0]["generated_text"])  # Convert string to JSON
+    except (json.JSONDecodeError, KeyError):
+        print("Error parsing JSON response:", result)
+        structured_output = {
+            "scenario": "Parsing error - check raw output.",
+            "shared_goal": "",
+            "first_agent_goal": "",
+            "second_agent_goal": ""
+        }
+
+    return structured_output
 
 def generate_interaction_prompt(agent1,agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, model, tokenizer):    # Define the JSON structure for the result
     json_format = {
