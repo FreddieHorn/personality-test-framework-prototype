@@ -30,8 +30,13 @@ def evaluation(input_csv: str, output_csv: str, model, tokenizer):
             model = model,
             tokenizer = tokenizer
         )
-        scores_agent_1.append(float(result["Agent A"]["Goal"]["score"]))
-        scores_agent_2.append(float(result["Agent B"]["Goal"]["score"]))
+        try:
+            scores_agent_1.append(float(result["Agent A"]["Goal"]["score"]))
+            scores_agent_2.append(float(result["Agent B"]["Goal"]["score"]))
+        except:
+            scores_agent_1.append(0)
+            scores_agent_2.append(0)
+            print("Skipping row, adjust manually")
         results.append(result)
         print(result) 
      # Save results
