@@ -33,15 +33,10 @@ def scenario_generation(input_csv: str, output_csv: str,  model, tokenizer, mode
                                                 setting=row["Setting"],
                                                 topic=row["Topic"],
                                                 model=model, tokenizer=tokenizer)
-            print(f"Concept agent prompt: \n {step_1_scenario["scenario"]}")
             step_2_scenario = narrative_agent_prompt(step_1_scenario["scenario"], model=model, tokenizer=tokenizer)
-            print(f"Narrative agent prompt: \n {step_2_scenario["scenario"]}")
             step_3_scenario = logical_consistency_agent_prompt(step_2_scenario["scenario"], model = model, tokenizer = tokenizer)
-            print(f"Logical consistency agent prompt: \n {step_3_scenario["scenario"]}")
             result_scenario = conflict_agent_prompt(step_3_scenario["scenario"], model=model, tokenizer = tokenizer, temperature = temperature)
-            print(f"Conflict (Result) agent prompt: \n {step_3_scenario["scenario"]}")
             goal_creation = goal_agent_prompt(result_scenario["scenario"], model=model, tokenizer = tokenizer)
-            print(f"Goals: \n {goal_creation}")
             result_scenario.update(goal_creation)
             results.append(result_scenario)
             print(result_scenario) 

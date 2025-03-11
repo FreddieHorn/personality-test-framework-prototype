@@ -28,7 +28,7 @@ if __name__ == "__main__":
         for scengen_mode in scenario_generation_modes:
             for inter_mode in interaction_modes:
                 for csv in characters_csvs:
-                    print(f"PROCESSING {csv} || interaction_mode: {inter_mode} || temperature {temperature}")
+                    print(f"PROCESSING {csv} || scenario_mode {scengen_mode} || interaction_mode: {inter_mode} || temperature {temperature}")
                     date = datetime.now().strftime("%Y-%m-%d_%H-%M")
                     folder_name = f"{prefix}/{csv.split("_")[1].split(".")[0]}_{scengen_mode}_{inter_mode}_{temperature}"
                     os.makedirs(f"output/{folder_name}", exist_ok=True)
