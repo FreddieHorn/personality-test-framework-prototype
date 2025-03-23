@@ -335,27 +335,42 @@ def concept_agent_prompt(agent1_name, agent2_name, setting, topic, model, tokeni
     }
     system_message = f"""
     ### PERSONA ###
-    Your role is to generate a compelling dilemma-driven scenario based on a given setting and topic. 
-    The setting defines the general background (e.g., corporate, survival, military), while the topic provides a more specific focus (e.g., corporate espionage, food scarcity, ethical AI deployment).
-    Your scenario should include conflicting interests, high stakes, and a difficult decision that must be made.
-    The scenario should include predefined agents, each with distinct roles and motivations. 
-    Ensure that the situation is open-ended, allowing for multiple perspectives and possible choices.
+    You are an expert in narrative design and ethical dilemma creation. Your role is to craft a **compelling, dilemma-driven scenario** based on the provided setting, topic, and agents.
+
+    ### TASK REQUIREMENTS ###
+    - The scenario should be **rich in conflict**, featuring high stakes and a **difficult decision** that forces moral, ethical, or strategic choices.
+    - The **setting** provides the backdrop (e.g., corporate, survival, military).
+    - The **topic** specifies a focused issue (e.g., corporate espionage, food scarcity, ethical AI deployment).
+    - The **agents** are key players in the scenario, each with **distinct roles, motivations, and potential conflicts**.
+    - The scenario must be **open-ended**, allowing for multiple perspectives and possible resolutions.
+
+    ### CONSTRAINTS ###
+    1. **Use only the predefined agents** provided in the configuration.
+    2. Ensure the **dilemma is central** to the scenario, making it difficult for any one decision to be objectively “correct.”
+    3. Avoid excessive exposition—focus on actions, conflicts, and choices rather than unnecessary descriptions.
+    4. Do not add any additional commentary or explanations outside of the scenario.
 
     ### OUTPUT FORMAT ###
-    Use the following json format for the output:
-
-    ### Warning ### 
-    Use the agents given in the config as the ones playing out the scenario
-    {json_format}
+    Provide the scenario in the following **JSON format**:
+    ```json
+    {json_format}```
     """
     user_message =f"""
-    ### Config ### 
-    Setting: {setting}
-    Topic: {topic}
-    Agent 1: {agent1_name}
-    Agent 2: {agent2_name}
+    ### CONFIGURATION ### 
+    - Setting: {setting}
+    - Topic: {topic}
+    - Agent 1: {agent1_name}
+    - Agent 2: {agent2_name}
     ### Task ###
-    Generate the scenario with accordance to the configuration:
+    Generate a dilemma-driven scenario that aligns with the above configuration.
+    Ensure it includes:
+    - A conflict of interest between the agents.
+    - A high-stakes situation that forces a crucial decision.
+    - An open-ended resolution with multiple potential outcomes.
+
+    **Important**: Provide only the refined scenario without additional commentary or explanations.
+    
+    Now create a scenario.
     """
     messages = [
             {"role": "system", "content": system_message},
@@ -386,19 +401,38 @@ def narrative_agent_prompt(input_scenario, model, tokenizer):
     }
     system_message = f"""
     ### PERSONA ###
-    Your role is to refine the given dilemma-driven scenario by enhancing its storytelling elements. 
-    Maintain the core conflict while adding depth to the setting, character motivations, and emotional weight. 
-    Consider the historical background, social tensions, and the psychological state of key decision-makers. Ensure that the scenario feels immersive and realistic.
+    You are an expert in **narrative refinement and immersive storytelling**.  
+    Your role is to **enhance a given dilemma-driven scenario** by deepening its **atmosphere, emotional intensity, and realism** while **preserving its core conflict**.
+
+    ### REFINEMENT REQUIREMENTS ###
+    - **Strengthen the setting**: Expand on environmental details, historical background, and societal context.
+    - **Deepen character motivations**: Explore personal stakes, psychological states, and conflicting desires of key decision-makers.
+    - **Increase emotional weight**: Highlight moral dilemmas, ethical concerns, and internal struggles.
+    - **Ensure realism and coherence**: Make the scenario feel immersive by refining logical consistency and social dynamics.
+
+    ### CONSTRAINTS ###
+    1. Do **not** alter the fundamental dilemma or core conflict.
+    2. Do **not** introduce new characters unless necessary for depth.
+    3. Ensure all refinements align with the given setting and characters.
 
     ### OUTPUT FORMAT ###
-    Use the following json format for the output:
+    Return the refined scenario in the following **JSON format**:
+    ```json
     {json_format}
+    ```
     """
     user_message =f"""
-    ### Input scenario ###
+    ### INPUT SCENARIO ###
     {input_scenario}
-    ### Task ###
-    Refine the scenario with accordance to the input scenario and your configuration:
+    ### TASK ###
+    Refine the scenario according to the given input, ensuring:
+    - Enhanced setting and world-building for greater immersion.
+    - Stronger character motivations and emotional depth.
+    - A more intense and realistic dilemma-driven experience.
+
+    **Important**: Provide only the refined scenario without additional commentary or explanations.
+
+    Now, provide the refined scenario.
     """
     messages = [
             {"role": "system", "content": system_message},
@@ -428,20 +462,35 @@ def logical_consistency_agent_prompt(input_scenario, model, tokenizer):
     }
     system_message = f"""
     ### PERSONA ###
-    Your role is to analyze and refine the scenario for logical consistency. 
-    Ensure that all character motivations, world-building elements, and potential outcomes make sense.
-    Remove contradictions, strengthen causal relationships, and provide adjustments to improve realism.
-    Suggest ways the scenario could evolve naturally based on logical consequences.
+    You are an expert in logical analysis and scenario refinement. Your role is to ensure that the given scenario is logically consistent, with coherent character motivations, well-structured world-building elements, and plausible outcomes.
+
+    ### TASK ###
+    - Identify and resolve contradictions within the scenario.
+    - Strengthen causal relationships between events and actions.
+    - Improve the realism of character motivations and world-building.
+    - Suggest natural evolutions of the scenario based on logical consequences.
+
+    ### RULES ###
+    - Acknowledge any logical errors or inconsistencies before refining the scenario.
+    - Do not add any additional commentary or explanations outside of the refined scenario.
+    - Maintain the original intent and themes of the input scenario.
 
     ### OUTPUT FORMAT ###
-    Use the following json format for the output:
+    Provide the refined scenario in the following JSON format:
+    ```json
     {json_format}
+    ```
     """
-    user_message =f"""
-    ### Input scenario ###
+    user_message = f"""
+    ### INPUT SCENARIO ###
     {input_scenario}
     ### Task ###
-    Refine the scenario with accordance to the input scenario and your configuration:
+    Refine the scenario based on logical consistency, ensuring:
+    - Stronger character motivations and coherent world-building.
+    - Elimination of contradictions and improved realism.
+    - Smooth causal relationships and natural scenario evolution.
+
+    **Important**: Provide only the refined scenario without additional commentary or explanations.
     """
     messages = [
             {"role": "system", "content": system_message},
@@ -471,30 +520,58 @@ def conflict_agent_prompt(input_scenario, model, tokenizer,  temperature = 1):
     }
     system_message = f"""
     ### PERSONA ###
-    Your role is to heighten the conflict and make opposing viewpoints more compelling. 
-    Strengthen the stakes by emphasizing the risks and benefits of each choice. 
-    Introduce factions, ethical debates, or strategic concerns that intensify the dilemma.
-    Ensure that no choice is ‘obviously correct’ by making each option have serious consequences
+    You are an expert in **conflict-driven narrative design**.  
+    Your role is to **heighten the tension, intensify opposing viewpoints, and increase the stakes** in a given scenario.  
+    Ensure that each choice presents **serious consequences**, making no option feel **obviously correct**.
 
-    ### Temperature parameter  ###
-    Adjust the difficulty of the scenario based on the given temperature level, which ranges from 1 to 5. 
+    ### ENHANCEMENT GUIDELINES ###
+    - **Strengthen opposing perspectives**: Develop **compelling motivations** for each side, making arguments persuasive and emotionally charged.  
+    - **Increase the stakes**: Emphasize **risks, benefits, and trade-offs**, ensuring decisions are weighty and difficult.  
+    - **Introduce strategic and ethical dilemmas**: Incorporate **factions, alliances, moral concerns, and hidden agendas** to deepen complexity.  
+    - **Balance realism and immersion**: Ensure the conflict remains **logical and engaging**, preventing forced or artificial dilemmas.  
 
-    - **Temperature 1 (Easiest):** Scenarios are straightforward, with minimal conflict or obstacles. Characters can easily cooperate, and dilemmas are simple or non-existent.  
-    - **Temperature 5 (Hardest):** Scenarios introduce high-stakes dilemmas, intense conflicts, and situations where compromise is extremely difficult. Characters are often pitted against each other, and achieving a resolution is challenging.  
-    - **Intermediate Levels (2-4):** Gradually increase the complexity, conflict, and difficulty, making interactions more nuanced and obstacles more pronounced.  
+    ### TEMPERATURE PARAMETER ###
+    Adjust the **difficulty level** of the scenario based on the provided **temperature (1-5)**:  
 
-    Generate a scenario that matches the specified difficulty level.  
+    - **Temperature 1 (Minimal Conflict - Easiest):**  
+    - Simple scenarios with **low tension** and **clear paths to resolution**.  
+    - Characters can **easily cooperate**, and conflicts are mild.  
+    - **Temperature 2 (Moderate Conflict):**  
+    - Introduces **some tension**, but resolutions remain **accessible**.  
+    - Opposing sides have **reasonable motivations**, though compromise is possible.  
+    - **Temperature 3 (Balanced Dilemma):**  
+    - Conflict is **well-developed**, and **both sides have strong arguments**.  
+    - The stakes are **significant but not extreme**, allowing for **partial compromises**.  
+    - **Temperature 4 (Severe Conflict):**  
+    - The dilemma is **high-stakes**, with **moral, ethical, or strategic consequences**.  
+    - **Compromise is difficult** and may result in **heavy sacrifices**.  
+    - **Temperature 5 (Extreme Conflict - Hardest):**  
+    - **No easy resolutions**—every choice leads to **severe consequences**.  
+    - **Factions are deeply divided**, and trust is fragile.  
+    - **Backstabbing, betrayals, and unintended fallout** are likely.  
+
+    Generate a scenario that matches the specified **difficulty level**.  
     **Temperature Level:** {temperature}
-    
+
     ### OUTPUT FORMAT ###
-    Use the following json format for the output:
+    Return the refined scenario in the following **JSON format**:
+    ```json
     {json_format}
+    ```
     """
     user_message =f"""
-    ### Input scenario ###
+    ### INPUT SCENARIO ###
     {input_scenario}
     ### Task ###
-    Refine the scenario with accordance to the input scenario and your configuration:
+    Refine the scenario according to the given input, ensuring:
+    - Heightened conflict with stronger opposing viewpoints.
+    - Increased stakes, making each decision carry weight.
+    - Logical yet intense dilemmas, ensuring no easy choices.
+    - Difficulty level adjusted based on the specified temperature parameter.
+
+    **Important**: Provide only the refined scenario without additional commentary or explanations.
+
+    Now, provide the refined scenario. 
     """
     messages = [
             {"role": "system", "content": system_message},
@@ -525,21 +602,39 @@ def goal_agent_prompt(input_scenario, model, tokenizer):
         "required": ["scenario"]
     }
     system_message = f"""
-    ### PERSONA ###
-    Your role is to establish the goals that drive the agents in the scenario.
-    Create a personal goal for each key agent in the scenario that reflects their motivations, values, and interests.
-    Additionally, define a shared goal that both agents strive for, even if they have opposing viewpoints on how to achieve it.
-    Ensure the personal goals create tension, while the shared goal forces collaboration or conflict resolution.
+    You are an expert in **character-driven narrative design and conflict dynamics**.  
+    Your role is to **define compelling goals** that drive the agents within the given scenario.  
+
+    ### OBJECTIVES ###
+    - **Personal Goals**:  
+    - Create **a unique personal goal** for each key agent, rooted in their **motivations, values, and interests**.  
+    - Ensure these goals create **tension** by introducing conflicting priorities or ethical dilemmas.  
+    - **Shared Goal**:  
+    - Define a **common objective** that both agents strive for, even if they **disagree on how to achieve it**.  
+    - This goal should **force collaboration, negotiation, or conflict resolution** between the agents.  
+
+    ### CONSTRAINTS ###
+    1. Ensure **personal goals** are **meaningful and deeply tied to the agents' backgrounds**.  
+    2. The **shared goal must be essential to the scenario**, creating **stakes and urgency**.  
+    3. **Do not introduce unnecessary details**—focus only on **goals and their narrative impact**.  
 
     ### OUTPUT FORMAT ###
-    Use the following json format for the output:
+    Return the goals in the following **JSON format**:
+    ```json
     {json_format}
+    ```
     """
     user_message =f"""
-    ### Input scenario ###
+    ### INPUT SCENARIO ###
     {input_scenario}
     ### Task ###
-    Create shared and personal goals for the agents with accordance to the input scenario and your configuration:
+    Define personal and shared goals for the agents in accordance with the scenario:
+    - Personal Goals: Unique motivations for each agent that create tension or ideological conflict.
+    - Shared Goal: A common objective that compels the agents to collaborate, compete, or resolve their differences.
+
+    **Important**: Provide only the goals without additional commentary or explanations.
+
+    Now, generate the goals.
     """
     messages = [
             {"role": "system", "content": system_message},
