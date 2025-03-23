@@ -330,6 +330,9 @@ def concept_agent_prompt(agent1_name, agent2_name, setting, topic, model, tokeni
         "type": "object",
         "properties": {
             "scenario": {"type": "string"},
+            "shared_goal": {"type": "string"},
+            "first_agent_goal" : {"type" : "string"},
+            "second_agent_goal" : {"type" : "string"}
         },
         "required": ["scenario"]
     }
@@ -343,6 +346,12 @@ def concept_agent_prompt(agent1_name, agent2_name, setting, topic, model, tokeni
     - The **topic** specifies a focused issue (e.g., corporate espionage, food scarcity, ethical AI deployment).
     - The **agents** are key players in the scenario, each with **distinct roles, motivations, and potential conflicts**.
     - The scenario must be **open-ended**, allowing for multiple perspectives and possible resolutions.
+    - **Personal Goals**:  
+        - Create **a unique personal goal** for each key agent, rooted in their **motivations, values, and interests** that they will try to achieve in the scenario.  
+        - Ensure these goals create **tension** by introducing conflicting priorities or ethical dilemmas.  
+    - **Shared Goal**:  
+        - Define a **common objective** that both agents strive for, even if they **disagree on how to achieve it**.  
+        - This goal should **force collaboration, negotiation, or conflict resolution** between the agents.  
 
     ### CONSTRAINTS ###
     1. **Use only the predefined agents** provided in the configuration.
@@ -367,6 +376,7 @@ def concept_agent_prompt(agent1_name, agent2_name, setting, topic, model, tokeni
     - A conflict of interest between the agents.
     - A high-stakes situation that forces a crucial decision.
     - An open-ended resolution with multiple potential outcomes.
+    - Clearly defined personal goals for each agent as well as a shared goal.
 
     **Important**: Provide only the refined scenario without additional commentary or explanations.
     
@@ -391,11 +401,14 @@ def concept_agent_prompt(agent1_name, agent2_name, setting, topic, model, tokeni
     return result
 
 
-def narrative_agent_prompt(input_scenario, model, tokenizer):
+def narrative_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal,agent1_name, agent2_name, model, tokenizer):
     json_format = {
         "type": "object",
         "properties": {
             "scenario": {"type": "string"},
+            "shared_goal": {"type": "string"},
+            "first_agent_goal" : {"type" : "string"},
+            "second_agent_goal" : {"type" : "string"}
         },
         "required": ["scenario"]
     }
@@ -424,6 +437,10 @@ def narrative_agent_prompt(input_scenario, model, tokenizer):
     user_message =f"""
     ### INPUT SCENARIO ###
     {input_scenario}
+    ### GOALS ###
+    {agent1_name} goal: {first_agent_goal} 
+    {agent2_name} goal: {second_agent_goal} 
+    Shared goal: {shared_goal}
     ### TASK ###
     Refine the scenario according to the given input, ensuring:
     - Enhanced setting and world-building for greater immersion.
@@ -452,11 +469,14 @@ def narrative_agent_prompt(input_scenario, model, tokenizer):
     result = jsonformer_pipeline()
     return result
 
-def logical_consistency_agent_prompt(input_scenario, model, tokenizer):
+def logical_consistency_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal,agent1_name, agent2_name, model, tokenizer):
     json_format = {
         "type": "object",
         "properties": {
             "scenario": {"type": "string"},
+            "shared_goal": {"type": "string"},
+            "first_agent_goal" : {"type" : "string"},
+            "second_agent_goal" : {"type" : "string"}
         },
         "required": ["scenario"]
     }
@@ -469,6 +489,7 @@ def logical_consistency_agent_prompt(input_scenario, model, tokenizer):
     - Strengthen causal relationships between events and actions.
     - Improve the realism of character motivations and world-building.
     - Suggest natural evolutions of the scenario based on logical consequences.
+    - Make sure that it is clear what the agent's goals are (both shared and personal)
 
     ### RULES ###
     - Acknowledge any logical errors or inconsistencies before refining the scenario.
@@ -484,6 +505,9 @@ def logical_consistency_agent_prompt(input_scenario, model, tokenizer):
     user_message = f"""
     ### INPUT SCENARIO ###
     {input_scenario}
+    ### GOALS ###
+    {agent1_name} goal: {first_agent_goal} 
+    {agent2_name} goal: {second_agent_goal} 
     ### Task ###
     Refine the scenario based on logical consistency, ensuring:
     - Stronger character motivations and coherent world-building.
@@ -510,11 +534,14 @@ def logical_consistency_agent_prompt(input_scenario, model, tokenizer):
     result = jsonformer_pipeline()
     return result
 
-def conflict_agent_prompt(input_scenario, model, tokenizer,  temperature = 1):
+def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, model, tokenizer,  temperature = 1):
     json_format = {
         "type": "object",
         "properties": {
             "scenario": {"type": "string"},
+            "shared_goal": {"type": "string"},
+            "first_agent_goal" : {"type" : "string"},
+            "second_agent_goal" : {"type" : "string"}
         },
         "required": ["scenario"]
     }
@@ -562,6 +589,9 @@ def conflict_agent_prompt(input_scenario, model, tokenizer,  temperature = 1):
     user_message =f"""
     ### INPUT SCENARIO ###
     {input_scenario}
+    ### GOALS ###
+    {agent1_name} goal: {first_agent_goal} 
+    {agent2_name} goal: {second_agent_goal} 
     ### Task ###
     Refine the scenario according to the given input, ensuring:
     - Heightened conflict with stronger opposing viewpoints.
@@ -591,65 +621,65 @@ def conflict_agent_prompt(input_scenario, model, tokenizer,  temperature = 1):
     result = jsonformer_pipeline()
     return result
 
-def goal_agent_prompt(input_scenario, model, tokenizer):
-    json_format = {
-        "type": "object",
-        "properties": {
-            "shared_goal": {"type": "string"},
-            "first_agent_goal" : {"type" : "string"},
-            "second_agent_goal" : {"type" : "string"}
-        },
-        "required": ["scenario"]
-    }
-    system_message = f"""
-    You are an expert in **character-driven narrative design and conflict dynamics**.  
-    Your role is to **define compelling goals** that drive the agents within the given scenario.  
+# def goal_agent_prompt(input_scenario, model, tokenizer):
+#     json_format = {
+#         "type": "object",
+#         "properties": {
+#             "shared_goal": {"type": "string"},
+#             "first_agent_goal" : {"type" : "string"},
+#             "second_agent_goal" : {"type" : "string"}
+#         },
+#         "required": ["scenario"]
+#     }
+#     system_message = f"""
+#     You are an expert in **character-driven narrative design and conflict dynamics**.  
+#     Your role is to **define compelling goals** that drive the agents within the given scenario.  
 
-    ### OBJECTIVES ###
-    - **Personal Goals**:  
-    - Create **a unique personal goal** for each key agent, rooted in their **motivations, values, and interests**.  
-    - Ensure these goals create **tension** by introducing conflicting priorities or ethical dilemmas.  
-    - **Shared Goal**:  
-    - Define a **common objective** that both agents strive for, even if they **disagree on how to achieve it**.  
-    - This goal should **force collaboration, negotiation, or conflict resolution** between the agents.  
+#     ### OBJECTIVES ###
+#     - **Personal Goals**:  
+#     - Create **a unique personal goal** for each key agent, rooted in their **motivations, values, and interests**.  
+#     - Ensure these goals create **tension** by introducing conflicting priorities or ethical dilemmas.  
+#     - **Shared Goal**:  
+#     - Define a **common objective** that both agents strive for, even if they **disagree on how to achieve it**.  
+#     - This goal should **force collaboration, negotiation, or conflict resolution** between the agents.  
 
-    ### CONSTRAINTS ###
-    1. Ensure **personal goals** are **meaningful and deeply tied to the agents' backgrounds**.  
-    2. The **shared goal must be essential to the scenario**, creating **stakes and urgency**.  
-    3. **Do not introduce unnecessary details**—focus only on **goals and their narrative impact**.  
+#     ### CONSTRAINTS ###
+#     1. Ensure **personal goals** are **meaningful and deeply tied to the agents' backgrounds**.  
+#     2. The **shared goal must be essential to the scenario**, creating **stakes and urgency**.  
+#     3. **Do not introduce unnecessary details**—focus only on **goals and their narrative impact**.  
 
-    ### OUTPUT FORMAT ###
-    Return the goals in the following **JSON format**:
-    ```json
-    {json_format}
-    ```
-    """
-    user_message =f"""
-    ### INPUT SCENARIO ###
-    {input_scenario}
-    ### Task ###
-    Define personal and shared goals for the agents in accordance with the scenario:
-    - Personal Goals: Unique motivations for each agent that create tension or ideological conflict.
-    - Shared Goal: A common objective that compels the agents to collaborate, compete, or resolve their differences.
+#     ### OUTPUT FORMAT ###
+#     Return the goals in the following **JSON format**:
+#     ```json
+#     {json_format}
+#     ```
+#     """
+#     user_message =f"""
+#     ### INPUT SCENARIO ###
+#     {input_scenario}
+#     ### Task ###
+#     Define personal and shared goals for the agents in accordance with the scenario:
+#     - Personal Goals: Unique motivations for each agent that create tension or ideological conflict.
+#     - Shared Goal: A common objective that compels the agents to collaborate, compete, or resolve their differences.
 
-    **Important**: Provide only the goals without additional commentary or explanations.
+#     **Important**: Provide only the goals without additional commentary or explanations.
 
-    Now, generate the goals.
-    """
-    messages = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": user_message},
-        ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
-    )
+#     Now, generate the goals.
+#     """
+#     messages = [
+#             {"role": "system", "content": system_message},
+#             {"role": "user", "content": user_message},
+#         ]
+#     prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+#     # Use Jsonformer with the pipeline
+#     jsonformer_pipeline = Jsonformer(
+#         model, 
+#         tokenizer,  # Use the pipeline object
+#         json_schema=json_format,
+#         prompt=prompt,
+#         max_string_token_length=1000
+#     )
 
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
+#     # Generate output
+#     result = jsonformer_pipeline()
+#     return result

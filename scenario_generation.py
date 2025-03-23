@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import re
 from transformers import AutoModel, AutoTokenizer
-from prompts import scenario_creation_prompt, concept_agent_prompt, narrative_agent_prompt, logical_consistency_agent_prompt, conflict_agent_prompt, goal_agent_prompt
+from prompts import scenario_creation_prompt, concept_agent_prompt, narrative_agent_prompt, logical_consistency_agent_prompt, conflict_agent_prompt
 emb_model_name = "sentence-transformers/all-MiniLM-L6-v2"
 emb_tokenizer = AutoTokenizer.from_pretrained(emb_model_name)
 emb_model = AutoModel.from_pretrained(emb_model_name)
@@ -30,31 +30,42 @@ def scenario_generation(input_csv: str, output_csv: str,  model, tokenizer, mode
             print(result) 
     elif mode == 'agentic':
         for _, row in data.iterrows():
-            step_1_scenario = concept_agent_prompt(agent1_name = row["Character1"], 
-                                                agent2_name= row["Character2"], 
-                                                setting=row["Setting"],
-                                                topic=row["Topic"],
+            agent1_name = row["Character1"], 
+            agent2_name= row["Character2"], 
+            setting=row["Setting"],
+            topic=row["Topic"],
+            step_1_scenario = concept_agent_prompt(agent1_name, 
+                                                agent2_name, 
+                                                setting,
+                                                topic,
                                                 model=model, tokenizer=tokenizer)
-            step_2_scenario = narrative_agent_prompt(step_1_scenario["scenario"], model=model, tokenizer=tokenizer)
-            step_3_scenario = logical_consistency_agent_prompt(step_2_scenario["scenario"], model = model, tokenizer = tokenizer)
-            result_scenario = conflict_agent_prompt(step_3_scenario["scenario"], model=model, tokenizer = tokenizer, temperature = temperature)
+            shared_goal = step_1_scenario["shared_goal"]
+            first_agent_goal = step_1_scenario["first_agent_goal"]
+            second_agent_goal = step_1_scenario["second_agent_goal"]
+            print(f"Concept agent scenario: {step_1_scenario["scenario"]}")
+            step_2_scenario = narrative_agent_prompt(step_1_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, model=model, tokenizer=tokenizer)
+            print(f"Narrative agent scenario: {step_2_scenario["scenario"]}")
+            step_3_scenario = conflict_agent_prompt(step_2_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, model=model, tokenizer = tokenizer, temperature = temperature)
+            print(f"Conflict agent scenario: {step_3_scenario["scenario"]}")
+            result_scenario = logical_consistency_agent_prompt(step_3_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, model = model, tokenizer = tokenizer)
             sem_align_score, setting_similarity, topic_similarity, agents_similarity = semantic_alignment_score(result_scenario["scenario"], row["Setting"], row["Topic"],
                                                                                                                 row["Character1"], row["Character2"])
             narrative_coh_score = narrative_coherence_score(result_scenario["scenario"],row["Setting"], row["Topic"], row["Character1"], row["Character2"])
-            goal_creation = goal_agent_prompt(result_scenario["scenario"], model=model, tokenizer = tokenizer)
-            result_scenario.update(goal_creation)
+            result_scenario["narrative_COH"] = narrative_coh_score
+            result_scenario["sem_alignment"] = sem_align_score
             results.append(result_scenario)
             print(f"Setting: {row["Setting"]}, Topic: {row["Topic"]}")
-            print(f"Scenario: {result_scenario}")
+            print(f"Scenario (Logic): {result_scenario}")
             print(f"Semantic Alignment Scores: {sem_align_score}, Setting similarity: {setting_similarity}, Topic similarity: {topic_similarity}, Agents similarity: {agents_similarity}")
             print(f"Narrative Coherence Score: {narrative_coh_score}") 
 
      # Save results
     data["scenario"] = [result.get("scenario", "") for result in results]
+    data["narrative_COH_score"] = [result.get("narrative_COH", "") for result in results]
+    data["sem_alignment"] = [result.get("sem_alignment", "") for result in results]
     data["shared_goal"] = [result.get("shared_goal", "") for result in results]
     data["first_agent_goal"] = [result.get("first_agent_goal", "") for result in results]
     data["second_agent_goal"] = [result.get("second_agent_goal", "") for result in results]
-
     data.to_csv(output_csv, index=False)
     print(f"Results saved to {output_csv}")
 
