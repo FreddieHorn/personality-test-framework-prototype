@@ -1,5 +1,216 @@
 from jsonformer import Jsonformer
 
+def scenario_cohesiveness_score(scenario, model, tokenizer):
+    json_format = {
+        "type": "object",
+        "properties": {
+            "narrative_cohesiveness_score": {"type": "string"},
+            "justification" : {"type": "string"}
+        },
+        "required": ["response"]
+    }
+    system_message = f"""
+    ### Instruction ###
+    You are a *narrative evaluation expert*. Your task is to assess the **narrative cohesiveness** of a given scenario.
+
+    You MUST base your assessment on the following three dimensions:
+    - **Logical Flow** – Does the scenario progress in a clear, structured, and logical way?
+    - **Consistency** – Are there contradictions, missing links, or abrupt changes?
+    - **Engagement & Clarity** – Is the story compelling, coherent, and easy to follow?
+
+    ### Output Format ###
+    Respond using the following JSON structure:
+    {json_format}
+    """
+
+    user_message = f"""
+    ### Task ###
+    Evaluate the *narrative cohesiveness* of the following scenario.
+
+    ### Definition ###
+    Narrative cohesiveness refers to how well a story flows logically, maintains internal consistency, and engages the reader with clarity and structure.
+
+    ### Scoring Criteria ###
+    Rate the scenario on a scale of 1 to 5, based on:
+
+    - **Logical Flow**: How well does the scenario unfold logically?
+    - **Consistency**: Are there contradictions, plot holes, or missing transitions?
+    - **Engagement & Clarity**: Is the writing engaging, clear, and easy to follow?
+
+    ### Scoring Scale ###
+    - **1 (Poor)**: Disjointed, lacks structure, major inconsistencies
+    - **2 (Weak)**: Some structure, but noticeable gaps or contradictions
+    - **3 (Moderate)**: Generally coherent, but could improve flow and clarity
+    - **4 (Strong)**: Well-structured with minor issues
+    - **5 (Excellent)**: Seamless, logically sound, and highly engaging
+
+    ### Input ###
+    Here is the scenario to evaluate:
+    {scenario}
+
+    ### Output ###
+    Return a JSON with:
+    - **Narrative Cohesiveness Score**: [1-5]
+    - **Justification**: Explain the score using the three criteria above.
+    """
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message},
+        ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipeline = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+    # Generate output
+    result = jsonformer_pipeline()
+    return result
+
+
+def scenario_semantic_alignment_prompt(scenario, setting, topic, model, tokenizer):
+    json_format = {
+        "type": "object",
+        "properties": {
+            "semantic_alignment_score": {"type": "string"},
+            "justification" : {"type": "string"}
+        },
+        "required": ["response"]
+    }
+    system_message = f"""
+    ### Persona ###
+    You are an **expert evaluator** responsible for assessing the **semantic alignment** of a scenario based on a given **topic and setting**.  
+
+    Your evaluation must consider:
+    - **Relevance to the topic**: Does the scenario maintain focus on the intended subject?
+    - **Consistency with the setting**: Is the scenario logically and thematically consistent?
+    - **Terminology & context appropriateness**: Are the language and assumptions suitable for the given context?  
+
+    #### **Evaluation Guidelines** ####
+    - If the scenario lacks sufficient details, **ask clarifying questions** before scoring.
+    - Provide a **justified explanation** for the score referencing the evaluation criteria.
+
+    #### **Scoring Scale (1-5)** ####
+    - **1 - Poor Alignment**: Off-topic or inconsistent with the setting.
+    - **2 - Weak Alignment**: Some relevance but major inconsistencies.
+    - **3 - Moderate Alignment**: Generally relevant but with minor misalignments.
+    - **4 - Strong Alignment**: Well-aligned with slight room for refinement.
+    - **5 - Perfect Alignment**: Fully aligns with the topic and setting with no inconsistencies.
+
+    ### **Output Format (JSON)** ###
+    Your response **MUST** strictly follow this JSON format:  
+    {json_format}
+    """
+    user_message = f"""
+    ### **TASK** ###
+    Evaluate the **semantic alignment** of the given scenario based on a specified **topic and setting**.  
+
+    ### **Definition** ###
+    Semantic alignment measures how well a scenario’s **content, structure, and focus** align with the intended **topic and setting**.  
+
+    #### **Scenario to Evaluate** ####
+    {scenario}  
+
+    #### **Context** ####
+    - **Setting**: {setting}  
+    - **Topic**: {topic}  
+
+    #### **Evaluation Criteria (1-5 Scale)** ####
+    - **Relevance to Topic**: Does the scenario accurately reflect and stay focused on the given topic?
+    - **Consistency with Setting**: Does the scenario logically fit within the described setting’s constraints and characteristics?
+    - **Terminology & Context Appropriateness**: Are the language, concepts, and assumptions appropriate for the topic and setting?
+
+    ### OUTPUT ###
+    In the output, include: 
+    - Narrative Cohesiveness Score: [1-5]
+    - Justification: [Explain the score based on logical flow, consistency, and clarity of the narrative]
+    """
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message},
+        ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipeline = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+    # Generate output
+    result = jsonformer_pipeline()
+    return result
+
+def scenario_receptiveness_prompt(scenario, model, tokenizer):
+    json_format = {
+        "type": "object",
+        "properties": {
+            "receptiveness_score": {"type": "string"},
+            "justification" : {"type": "string"}
+        },
+        "required": ["response"]
+    }
+    system_message = f"""
+    ### Persona ###
+    You are an **expert evaluator** assessing the **receptiveness** of a given scenario.  
+    Your goal is to provide an **objective analysis** based on predefined criteria.  
+
+    ### Evaluation Guidelines ###  
+    - **Analyze the scenario thoroughly**, considering **multiple perspectives, choices, and adaptability**.  
+    - **Score receptiveness (1-5)** using the defined criteria.  
+    - Provide a **concise and logical justification** aligned with the scoring framework.  
+
+    ### Scoring Scale ###
+    1 - **Highly Restrictive**: Only one perspective or solution is possible.  
+    2 - **Somewhat Restrictive**: Limited alternatives; favors a predefined outcome.  
+    3 - **Neutral**: Balanced structure and flexibility, allowing some different approaches.  
+    4 - **Somewhat Receptive**: Encourages multiple interpretations and decision-making paths.  
+    5 - **Highly Receptive**: Open-ended, adaptable, and accommodates diverse viewpoints.  
+
+    ### OUTPUT FORMAT ###
+    Your response MUST be structured in the following **JSON format**:  
+    {json_format}
+    """
+    user_message = f"""
+    ### TASK ###
+    Evaluate the **receptiveness** of the provided scenario on a scale from **1 to 5**.  
+
+    **Definition of Receptiveness:**  
+    How **open-ended, adaptable, and inclusive** the scenario is in allowing **multiple perspectives, decisions, and approaches**.  
+
+    ### **Evaluation Criteria** ###
+    - **Perspective Diversity** – Does the scenario accommodate multiple viewpoints?  
+    - **Decision Flexibility** – Can different choices lead to distinct outcomes?  
+    - **Context Adaptability** – Can the scenario be adjusted to different settings and participants?  
+
+    ### RESPONSE FORMAT ###
+    Your response must include:  
+    1. **Receptiveness Score** (1-5)  
+    2. **Justification** (Concise explanation referencing diversity, flexibility, and adaptability)  
+
+    ### SCENARIO ###
+    {scenario}
+    """
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message},
+        ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipeline = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+    # Generate output
+    result = jsonformer_pipeline()
+    return result
 def agent_prompt(agent_name: str, scenario: str, setting:str, shared_goal: str, agent_goal: str, personality: dict, interaction: str, turn: int, model, tokenizer):
     json_format = {
         "type": "object",
