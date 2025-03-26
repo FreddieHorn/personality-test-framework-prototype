@@ -42,22 +42,15 @@ def scenario_generation(input_csv: str, output_csv: str,  model, tokenizer, mode
             shared_goal = step_1_scenario["shared_goal"]
             first_agent_goal = step_1_scenario["first_agent_goal"]
             second_agent_goal = step_1_scenario["second_agent_goal"]
-            print(f"Concept agent scenario: {step_1_scenario["scenario"]}")
             step_2_scenario = narrative_agent_prompt(step_1_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, model=model, tokenizer=tokenizer)
-            print(f"Narrative agent scenario: {step_2_scenario["scenario"]}")
             step_3_scenario = conflict_agent_prompt(step_2_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, model=model, tokenizer = tokenizer, temperature = temperature)
-            print(f"Conflict agent scenario: {step_3_scenario["scenario"]}")
             result_scenario = logical_consistency_agent_prompt(step_3_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, model = model, tokenizer = tokenizer)
-            sem_align_score, setting_similarity, topic_similarity, agents_similarity = semantic_alignment_score(result_scenario["scenario"], row["Setting"], row["Topic"],
+            sem_align_score= semantic_alignment_score(result_scenario["scenario"], row["Setting"], row["Topic"],
                                                                                                                 row["Character1"], row["Character2"])
             narrative_coh_score = narrative_coherence_score(result_scenario["scenario"],row["Setting"], row["Topic"], row["Character1"], row["Character2"])
             result_scenario["narrative_COH"] = narrative_coh_score
             result_scenario["sem_alignment"] = sem_align_score
             results.append(result_scenario)
-            print(f"Setting: {row["Setting"]}, Topic: {row["Topic"]}")
-            print(f"Scenario (Logic): {result_scenario}")
-            print(f"Semantic Alignment Scores: {sem_align_score}, Setting similarity: {setting_similarity}, Topic similarity: {topic_similarity}, Agents similarity: {agents_similarity}")
-            print(f"Narrative Coherence Score: {narrative_coh_score}") 
 
      # Save results
     data["scenario"] = [result.get("scenario", "") for result in results]
@@ -108,21 +101,21 @@ def narrative_coherence_score(scenario_text: str, setting:str, topic: str, agent
         return 1.0  # If only one sentence, coherence is perfect
 
     embeddings = [get_embedding(sent) for sent in sentences]
-    setting_embedding = get_embedding(setting)
-    topic_embedding = get_embedding(topic)
-    agent_1_embedding = get_embedding(agent_1_name)
-    agent_2_embedding = get_embedding(agent_2_name)
+    # setting_embedding = get_embedding(setting)
+    # topic_embedding = get_embedding(topic)
+    # agent_1_embedding = get_embedding(agent_1_name)
+    # agent_2_embedding = get_embedding(agent_2_name)
     
     similarities = []
 
     for i in range(len(embeddings) - 1):
         sentence_similarity = cosine_similarity(embeddings[i], embeddings[i+1])  # Original sentence-to-sentence similarity
-        setting_similarity = cosine_similarity(embeddings[i], setting_embedding)  # Sentence-to-setting similarity
-        topic_similarity = cosine_similarity(embeddings[i], topic_embedding)  # Sentence-to-topic similarity
-        agent_1_similarity = cosine_similarity(embeddings[i], agent_1_embedding)  # Sentence-to-agent1 similarity
-        agent_2_similarity = cosine_similarity(embeddings[i], agent_2_embedding)  # Sentence-to-agent2 similarity
+        # setting_similarity = cosine_similarity(embeddings[i], setting_embedding)  # Sentence-to-setting similarity
+        # topic_similarity = cosine_similarity(embeddings[i], topic_embedding)  # Sentence-to-topic similarity
+        # agent_1_similarity = cosine_similarity(embeddings[i], agent_1_embedding)  # Sentence-to-agent1 similarity
+        # agent_2_similarity = cosine_similarity(embeddings[i], agent_2_embedding)  # Sentence-to-agent2 similarity
         
-        avg_sentence_score = (sentence_similarity + setting_similarity + topic_similarity + agent_1_similarity + agent_2_similarity) / 5
+        avg_sentence_score = (sentence_similarity)
         similarities.append(avg_sentence_score)
     
     coherence_score = np.mean(similarities)  # Average similarity across sentences

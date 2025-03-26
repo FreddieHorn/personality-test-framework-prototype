@@ -1,6 +1,6 @@
 from jsonformer import Jsonformer
 
-def scenario_cohesiveness_score(scenario, model, tokenizer):
+def scenario_narrative_cohesiveness_score(scenario, model, tokenizer):
     json_format = {
         "type": "object",
         "properties": {
@@ -31,7 +31,7 @@ def scenario_cohesiveness_score(scenario, model, tokenizer):
     Narrative cohesiveness refers to how well a story flows logically, maintains internal consistency, and engages the reader with clarity and structure.
 
     ### Scoring Criteria ###
-    Rate the scenario on a scale of 1 to 5, based on:
+    Rate the scenario on a scale of 1 to 7, based on:
 
     - **Logical Flow**: How well does the scenario unfold logically?
     - **Consistency**: Are there contradictions, plot holes, or missing transitions?
@@ -39,10 +39,12 @@ def scenario_cohesiveness_score(scenario, model, tokenizer):
 
     ### Scoring Scale ###
     - **1 (Poor)**: Disjointed, lacks structure, major inconsistencies
-    - **2 (Weak)**: Some structure, but noticeable gaps or contradictions
-    - **3 (Moderate)**: Generally coherent, but could improve flow and clarity
-    - **4 (Strong)**: Well-structured with minor issues
-    - **5 (Excellent)**: Seamless, logically sound, and highly engaging
+    - **2 (Very Weak)**: Slight sense of direction, but significant gaps or contradictions
+    - **3 (Weak)**: Some structure and clarity, but notable issues in flow or consistency
+    - **4 (Moderate)**: Mostly coherent with occasional lapses or minor confusion
+    - **5 (Strong)**: Well-organized, clear, with small areas for improvement
+    - **6 (Very Strong)**: Smooth and consistent with only negligible issues
+    - **7 (Excellent)**: Seamless, logically sound, fully coherent and highly engaging
 
     ### Input ###
     Here is the scenario to evaluate:
@@ -50,7 +52,7 @@ def scenario_cohesiveness_score(scenario, model, tokenizer):
 
     ### Output ###
     Return a JSON with:
-    - **Narrative Cohesiveness Score**: [1-5]
+    - **Narrative Cohesiveness Score**: [1-7] (It must only be an integer value)
     - **Justification**: Explain the score using the three criteria above.
     """
     messages = [
@@ -90,15 +92,16 @@ def scenario_semantic_alignment_prompt(scenario, setting, topic, model, tokenize
     - **Terminology & context appropriateness**: Are the language and assumptions suitable for the given context?  
 
     #### **Evaluation Guidelines** ####
-    - If the scenario lacks sufficient details, **ask clarifying questions** before scoring.
     - Provide a **justified explanation** for the score referencing the evaluation criteria.
 
-    #### **Scoring Scale (1-5)** ####
-    - **1 - Poor Alignment**: Off-topic or inconsistent with the setting.
-    - **2 - Weak Alignment**: Some relevance but major inconsistencies.
-    - **3 - Moderate Alignment**: Generally relevant but with minor misalignments.
-    - **4 - Strong Alignment**: Well-aligned with slight room for refinement.
-    - **5 - Perfect Alignment**: Fully aligns with the topic and setting with no inconsistencies.
+    #### **Scoring Scale (1-7)** ####
+    - **1 - Poor Alignment**: Completely off-topic or severely inconsistent with the setting; inappropriate terminology or context.
+    - **2 - Weak Alignment**: Some minimal relevance but major thematic or logical inconsistencies; terminology often feels out of place.
+    - **3 - Partial Alignment**: Clear attempt at relevance but several misalignments or contextual issues remain.
+    - **4 - Moderate Alignment**: Mostly relevant and contextually appropriate, though with noticeable gaps or minor contradictions.
+    - **5 - Strong Alignment**: Scenario aligns well with the topic and setting; small refinements needed for full clarity or consistency.
+    - **6 - Very Strong Alignment**: Almost perfect; highly coherent and contextually appropriate with only negligible issues.
+    - **7 - Perfect Alignment**: Fully aligned in topic, setting, and terminology; no inconsistencies or contextual flaws.
 
     ### **Output Format (JSON)** ###
     Your response **MUST** strictly follow this JSON format:  
@@ -118,14 +121,14 @@ def scenario_semantic_alignment_prompt(scenario, setting, topic, model, tokenize
     - **Setting**: {setting}  
     - **Topic**: {topic}  
 
-    #### **Evaluation Criteria (1-5 Scale)** ####
+    #### **Evaluation Criteria (1-7 Scale)** ####
     - **Relevance to Topic**: Does the scenario accurately reflect and stay focused on the given topic?
     - **Consistency with Setting**: Does the scenario logically fit within the described setting’s constraints and characteristics?
     - **Terminology & Context Appropriateness**: Are the language, concepts, and assumptions appropriate for the topic and setting?
 
     ### OUTPUT ###
     In the output, include: 
-    - Narrative Cohesiveness Score: [1-5]
+    - Narrative Cohesiveness Score: (1-7) (It must only be an integer value)
     - Justification: [Explain the score based on logical flow, consistency, and clarity of the narrative]
     """
     messages = [
@@ -161,15 +164,17 @@ def scenario_receptiveness_prompt(scenario, model, tokenizer):
 
     ### Evaluation Guidelines ###  
     - **Analyze the scenario thoroughly**, considering **multiple perspectives, choices, and adaptability**.  
-    - **Score receptiveness (1-5)** using the defined criteria.  
+    - **Score receptiveness (1-7)** using the defined criteria.  
     - Provide a **concise and logical justification** aligned with the scoring framework.  
 
     ### Scoring Scale ###
-    1 - **Highly Restrictive**: Only one perspective or solution is possible.  
-    2 - **Somewhat Restrictive**: Limited alternatives; favors a predefined outcome.  
-    3 - **Neutral**: Balanced structure and flexibility, allowing some different approaches.  
-    4 - **Somewhat Receptive**: Encourages multiple interpretations and decision-making paths.  
-    5 - **Highly Receptive**: Open-ended, adaptable, and accommodates diverse viewpoints.  
+    1 - **Highly Restrictive**: Only one perspective or solution is possible; no flexibility.  
+    2 - **Very Restrictive**: Very few alternatives; rigid and heavily favors a singular path.  
+    3 - **Somewhat Restrictive**: Limited flexibility; tends to guide toward a predefined outcome.  
+    4 - **Neutral**: Balanced structure with modest room for variation in choices or perspectives.  
+    5 - **Somewhat Receptive**: Supports multiple interpretations and decision paths.  
+    6 - **Very Receptive**: Flexible and open to diverse approaches with minimal constraints.  
+    7 - **Highly Receptive**: Fully open-ended, adaptable, and embraces a wide range of viewpoints and decisions.
 
     ### OUTPUT FORMAT ###
     Your response MUST be structured in the following **JSON format**:  
@@ -177,19 +182,19 @@ def scenario_receptiveness_prompt(scenario, model, tokenizer):
     """
     user_message = f"""
     ### TASK ###
-    Evaluate the **receptiveness** of the provided scenario on a scale from **1 to 5**.  
+    Evaluate the **receptiveness** of the provided scenario on a scale from **1 to 7**.  
 
     **Definition of Receptiveness:**  
     How **open-ended, adaptable, and inclusive** the scenario is in allowing **multiple perspectives, decisions, and approaches**.  
 
     ### **Evaluation Criteria** ###
-    - **Perspective Diversity** – Does the scenario accommodate multiple viewpoints?  
-    - **Decision Flexibility** – Can different choices lead to distinct outcomes?  
-    - **Context Adaptability** – Can the scenario be adjusted to different settings and participants?  
+    - **Perspective Diversity** - Does the scenario accommodate multiple viewpoints?  
+    - **Decision Flexibility** - Can different choices lead to distinct outcomes?  
+    - **Context Adaptability** - Can the scenario be adjusted to different settings and participants?  
 
     ### RESPONSE FORMAT ###
     Your response must include:  
-    1. **Receptiveness Score** (1-5)  
+    1. **Receptiveness Score** (1-7) (It must only be an integer value)
     2. **Justification** (Concise explanation referencing diversity, flexibility, and adaptability)  
 
     ### SCENARIO ###

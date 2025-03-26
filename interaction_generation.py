@@ -52,7 +52,6 @@ def generate_interaction(input_csv: str, output_csv: str, model, tokenizer, mode
                                                  setting, topic, model, tokenizer)
 
             results.append(result)
-            print(result)
         data["interaction"] = [result.get("interaction", "") for result in results]
      # Save results
     
