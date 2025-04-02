@@ -5,13 +5,13 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 from scenario_generation import scenario_generation
 from interaction_generation import generate_interaction
-from evaluation import evaluation
+from evaluation import evaluation, evaluate_scenarios
 
 if __name__ == "__main__":
-    tempratures = [1,2,3,4,5]
-    interaction_modes = ["script", "default"]
+    tempratures = [5]
+    interaction_modes = ["default"]
     scenario_generation_modes = ["agentic", "default"]
-    characters_csvs = ["baseline_all.csv"]
+    characters_csvs = ["baseline_allmodified.csv"]
     MODEL_NAME = "meta-llama/Meta-Llama-3.1-8B-Instruct"
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     print("models declared")
     date = datetime.now().strftime("%Y-%m-%d_%H-%M")
-    prefix = f"session_agentic_{date}"
+    prefix = f"NEW"
     for temperature in tempratures: # I know that this triple for loop is diabolical and bash script probably would be better
         for scengen_mode in scenario_generation_modes:
             for inter_mode in interaction_modes:
@@ -36,6 +36,8 @@ if __name__ == "__main__":
                     step_1_csv_path = f'output/{folder_name}/scenarios.csv'
                     step_2_csv_path = f'output/{folder_name}/interactions.csv'
                     step_3_csv_path = f'output/{folder_name}/evaluated_interactions.csv'
+                    evaluate_scenarios_path = f'output/{folder_name}/evaluated_scenarios_v2.csv'
                     scenario_generation(step_0_csv_path, step_1_csv_path, model, tokenizer, mode=scengen_mode, temperature = temperature)
                     generate_interaction(step_1_csv_path, step_2_csv_path, model, tokenizer, mode=inter_mode)
                     evaluation(step_2_csv_path, step_3_csv_path, model, tokenizer)
+                    evaluate_scenarios(step_3_csv_path, evaluate_scenarios_path, model, tokenizer)

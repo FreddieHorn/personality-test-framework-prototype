@@ -1,8 +1,5 @@
-import torch
-import json
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import pandas as pd
-from jsonformer import Jsonformer
+from scenario_generation import narrative_coherence_emb_score, semantic_alignment_emb_score
 from prompts import evaluation_prompt, scenario_receptiveness_prompt, scenario_semantic_alignment_prompt, scenario_narrative_cohesiveness_score
 
 def evaluation(input_csv: str, output_csv: str, model, tokenizer):
@@ -56,6 +53,8 @@ def evaluate_scenarios(input_csv: str, output_csv: str, model, tokenizer):
     sem_align_scores = []
     COH_scores = []
     receptiveness_scores = []
+    sem_align_emb_scores = []
+    narrative_COH_emb_scores = []
     for _, row in data.iterrows():
         semantic_alignment_score = scenario_semantic_alignment_prompt(
             scenario=row["scenario"],
@@ -73,6 +72,16 @@ def evaluate_scenarios(input_csv: str, output_csv: str, model, tokenizer):
             model = model,
             tokenizer = tokenizer
         )
+        semantic_alignment_embedding_score, _, _ = semantic_alignment_emb_score(
+            scenario_text=row["scenario"],
+            setting = row["Setting"],
+            topic=row["Topic"]
+            )
+        narrative_coherence_embedding_score = narrative_coherence_emb_score(
+            scenario_text=row["scenario"]
+        )
+        narrative_COH_emb_scores.append(narrative_coherence_embedding_score)
+        sem_align_emb_scores.append(semantic_alignment_embedding_score)
         try:
             sem_align_scores.append(float(semantic_alignment_score["semantic_alignment_score"]))
         except:
@@ -90,13 +99,17 @@ def evaluate_scenarios(input_csv: str, output_csv: str, model, tokenizer):
             print(f"Error in receptivenes score - adjust manually")
 
         print(f"Scenario: {row["scenario"]}")
-        print(f"Scenario alignment scores: {float(semantic_alignment_score["semantic_alignment_score"])}")
-        print(f"Semantic Receptiveness score: {float(receptiveness_score["receptiveness_score"])}")
-        print(f"Narrative Coherence score: {float(sem_COH_score["narrative_cohesiveness_score"])}")
+        print(f"Scenario alignment scores: {semantic_alignment_score["semantic_alignment_score"]}")
+        print(f"Semantic Receptiveness score: {receptiveness_score["receptiveness_score"]}")
+        print(f"Narrative Coherence score: {sem_COH_score["narrative_cohesiveness_score"]}")
+        print(f"Scenario alignment EMBEDDING scores: {semantic_alignment_embedding_score}")
+        print(f"Narrative Coherence EMBEDDING score: {narrative_coherence_embedding_score}")
         
-    data["Scenario Receptiveness Score"] = receptiveness_score
+    data["Scenario Receptiveness Score"] = receptiveness_scores
     data["Semantic Alignment Score"] = sem_align_scores
     data["Narrative COH"] = COH_scores
+    data["Semantic Alignment Embedding Score"] = sem_align_emb_scores
+    data["Narrative Embedding COH"] = narrative_COH_emb_scores
         
     data.to_csv(output_csv, index=False)
     print(f"Results saved to {output_csv}")
