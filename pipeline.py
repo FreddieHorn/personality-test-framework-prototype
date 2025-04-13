@@ -8,8 +8,8 @@ from interaction_generation import generate_interaction
 from evaluation import evaluation, evaluate_scenarios
 
 if __name__ == "__main__":
-    tempratures = [5]
-    interaction_modes = ["default"]
+    tempratures = [1,2,3,4,5]
+    interaction_modes = ["agentic","default"]
     scenario_generation_modes = ["agentic", "default"]
     characters_csvs = ["baseline_allmodified.csv"]
     MODEL_NAME = "meta-llama/Meta-Llama-3.1-8B-Instruct"
