@@ -8,7 +8,7 @@ from interaction_generation import generate_interaction
 from evaluation import evaluation, evaluate_scenarios, evaluate_interactions
 
 if __name__ == "__main__":
-    tempratures = [5]
+    tempratures = [1,2,3,4,5]
     interaction_modes = ["default", "script"]
     scenario_generation_modes = ["agentic", "default"]
     characters_csvs = ["baseline_allmodified.csv"]
