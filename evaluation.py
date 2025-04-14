@@ -1,6 +1,8 @@
 import pandas as pd
-from scenario_generation import narrative_coherence_emb_score, semantic_alignment_emb_score
+import numpy as np
+from scenario_generation import narrative_coherence_emb_score, semantic_alignment_emb_score, cosine_similarity, get_embedding
 from prompts import evaluation_prompt, scenario_receptiveness_prompt, scenario_semantic_alignment_prompt, scenario_narrative_cohesiveness_score
+import re
 
 def evaluation(input_csv: str, output_csv: str, model, tokenizer):
     # Load the input data
@@ -113,6 +115,76 @@ def evaluate_scenarios(input_csv: str, output_csv: str, model, tokenizer):
         
     data.to_csv(output_csv, index=False)
     print(f"Results saved to {output_csv}")
+
+def evaluate_interactions(input_csv: str, output_csv: str, model, tokenizer):
+    data = pd.read_csv(input_csv)
+    print("read CSV")
+    narrative_coherence_scores = []
+    sem_align_scores = []
+    for _, row in data.iterrows():
+        narrative_coherence_score = narrative_coherence_emb_score_interactions(interaction_text=row["interaction"],
+                                                                                agent1_name = row["Character1"],
+                                                                                agent2_name = row["Character2"])
+        narrative_coherence_scores.append(narrative_coherence_score)
+        sem_align_score = semantic_alignment_score_interaction(interaction_text=row["interaction"],
+                                                                scenario_text=row["scenario"])
+        sem_align_scores.append(sem_align_score)
+
+        print(f"Interaction alignment scores: {sem_align_score }")
+        print(f"Narrative Coherence score: {narrative_coherence_score}")
+    
+    data["Semantic Alignment Score Interactions"] = sem_align_scores
+    data["Narrative COH Interactions"] = narrative_coherence_scores
+    data.to_csv(output_csv, index=False)
+    print(f"Results saved to {output_csv}")
+
+
+def split_dialogue_by_speakers(text, agent1, agent2):
+    # pattern2 = fr"({agent1}|{agent2}):(.*?)(?=(?:{agent1}|{agent2}):|$)"
+    # pattern = re.compile(pattern2)
+    pattern = r'({speaker1}|{speaker2}):(.*?)(?=(?:{speaker1}|{speaker2}):|$)'.format(speaker1=agent1, speaker2=agent2)
+    # Find all matches
+    
+    matches = re.findall(pattern, text, re.DOTALL)
+
+    return [dialogue.strip() for _, dialogue in matches]
+
+def narrative_coherence_emb_score_interactions(interaction_text: str, agent1_name: str, agent2_name: str):
+    """Compute the narrative coherence score"""
+
+    sentences = split_dialogue_by_speakers(interaction_text, agent1_name, agent2_name)
+    embeddings = [get_embedding(sent) for sent in sentences]
+    
+    similarities = []
+
+    for i in range(len(embeddings) - 1):
+        sentence_similarity = cosine_similarity(embeddings[i], embeddings[i+1])  # Original sentence-to-sentence similarity
+        
+        similarities.append(sentence_similarity)
+    
+    coherence_score = np.mean(similarities)  # Average similarity across sentences
+    return coherence_score
+
+def semantic_alignment_score_interaction(interaction_text: str, scenario_text):
+    """
+    Measures how close is the interaction to scenario semantically 
+    """
+    scenario_embedding = get_embedding(scenario_text)
+    interaction_embedding = get_embedding(interaction_text)
+
+    interaction_scenario_similarity = cosine_similarity(interaction_embedding, scenario_embedding)
+
+    return interaction_scenario_similarity
+
+def remove_speaker_names(text, agent1, agent2):
+    # Escape names to handle special characters
+    speaker1 = re.escape(agent1)
+    speaker2 = re.escape(agent2)
+    
+    # Regex pattern to match speaker names followed by a colon
+    pattern = re.compile(r'(?:{speaker1}|{speaker2}):'.format(speaker1=speaker1, speaker2=speaker2))
+
+    return re.sub(pattern, '', text)
 
 if __name__ == "__main__":
     evaluation()
