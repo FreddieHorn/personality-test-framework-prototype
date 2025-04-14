@@ -14,7 +14,7 @@ def scenario_generation(input_csv: str, output_csv: str,  model, tokenizer, mode
 
     # Process rows
     results = []
-
+    print(f"Generating Scenarios for temperature {temperature} and mode: {mode}")
     if mode == 'default':
         for _, row in data.iterrows():
             result = scenario_creation_prompt(
