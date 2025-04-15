@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from scenario_generation import narrative_coherence_emb_score, semantic_alignment_emb_score, cosine_similarity, get_embedding
-from prompts import evaluation_prompt, scenario_receptiveness_prompt, scenario_semantic_alignment_prompt, scenario_narrative_cohesiveness_score
+from prompts import scenario_receptiveness_prompt, scenario_semantic_alignment_prompt, scenario_narrative_cohesiveness_score, evaluation_prompt_personal_goal, evaluation_prompt_shared_goal
 import re
 
 def evaluation(input_csv: str, output_csv: str, model, tokenizer):
@@ -11,14 +11,18 @@ def evaluation(input_csv: str, output_csv: str, model, tokenizer):
     # Process rows
     results = []
     conversation = []
+    shared_goal_completion = []
+    shared_goal_reasonings = []
+    agent1_shares = []
+    agent2_shares = []
     scores_agent_1 = []
     scores_agent_2 = []
+
     for _, row in data.iterrows():
-        result = evaluation_prompt(
+        result = evaluation_prompt_personal_goal(
             interaction=row["interaction"],
             agent1=row["Character1"],
             agent2=row["Character2"],
-            goal=row["shared_goal"],
             first_agent_goal=row["first_agent_goal"],
             second_agent_goal=row["second_agent_goal"],
             scenario=row["scenario"],
@@ -29,6 +33,36 @@ def evaluation(input_csv: str, output_csv: str, model, tokenizer):
             model = model,
             tokenizer = tokenizer
         )
+        shared_goal_result = evaluation_prompt_shared_goal(
+            interaction=row["interaction"],
+            agent1=row["Character1"],
+            agent2=row["Character2"],
+            goal=row["shared_goal"],
+            scenario=row["scenario"],
+            personality1=row["Personality1"],
+            personality2=row["Personality2"],
+            model = model,
+            tokenizer = tokenizer
+        )
+        shared_goal_reasonings.append(shared_goal_result["reasoning"])
+        try: 
+            shared_goal_completion.append(float(shared_goal_result["shared_goal_completion"]))
+            print(f"shared_goal_completion Score: {shared_goal_result["shared_goal_completion"]}")
+        except:
+            shared_goal_completion.append(0)
+            print("Skipping shared completion row, adjust manually")
+        try: 
+            agent1_shares.append(float(shared_goal_result["agent1_share"]))
+            print(f"agent 1 share Score: {shared_goal_result["agent1_share"]}")
+        except:
+            agent1_shares.append(0)
+            print("Skipping agent 1 share row, adjust manually")
+        try: 
+            agent2_shares.append(float(shared_goal_result["agent2_share"]))
+            print(f"agent 2 share Score: {shared_goal_result["agent2_share"]}")
+        except:
+            agent2_shares.append(0)
+            print("Skipping agent 2 share row, adjust manually")
         try:
             scores_agent_1.append(float(result["Agent A"]["Goal"]["score"]))
             scores_agent_2.append(float(result["Agent B"]["Goal"]["score"]))
@@ -41,7 +75,12 @@ def evaluation(input_csv: str, output_csv: str, model, tokenizer):
      # Save results
     data["Character 1 evaluation"] = [result.get("Agent A", "") for result in results]
     data["Character 2 evaluation"] = [result.get("Agent B", "") for result in results]
+    data["Shared Goal Completion Score"] = shared_goal_completion
+    data["Shared Goal Completion Reasoning"] = shared_goal_reasonings
+    data["Agent 1 Shares"] = agent1_shares
+    data["Agent 2 Shares"] = agent2_shares
 
+    data["Character 2 evaluation"] = [result.get("Agent B", "") for result in results]
     print(f"Average Score for agent 1: {sum(scores_agent_1)/ len(scores_agent_1)}")
     print(f"Average Score for agent 2: {sum(scores_agent_2)/ len(scores_agent_2)}")
     
