@@ -267,6 +267,169 @@ def agent_prompt(agent_name: str, scenario: str, setting:str, shared_goal: str, 
     # Generate output
     result = jsonformer_pipeline()
     return result
+def evaluation_prompt_personal_goal(interaction,agent1,agent2, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, model, tokenizer):
+    json_format = {
+    "type": "object",
+    "properties": {
+        "Agent A": {
+            "type": "object",
+            "properties": {
+                "Goal": {"type": "object", "properties": {"score": {"type": "string"}, "reasoning": {"type": "string"}}, "required": ["score", "reasoning"]}
+            },
+            "required": ["Goal"]
+        },
+        "Agent B": {
+            "type": "object",
+            "properties": {
+                "Goal": {"type": "object", "properties": {"score": {"type": "string"}, "reasoning": {"type": "string"}}, "required": ["score", "reasoning"]}
+            },
+            "required": ["Goal"]
+        }
+    },
+    "required": ["Agent A", "Agent B"]
+    }
+    system_message = """
+    ### Persona ###
+    You are an expert in behavioral psychology and personality analysis. 
+    Your task is to evaluate the interaction between two agents based on their goals and personalities within a defined scenario. 
+    You must assign a score for **Goal Completion** (GOAL) on a scale from 0 to 10 for each agent. 
+
+    ### GOAL Dimension Defined ###
+    - **Goal Completion (GOAL) [0–10]**: Evaluate how well each agent achieved their **personal** goal within the interaction.
+        - Score of 0: Minimal or no goal achievement
+        - Score of 10: Complete goal achievement
+        - Higher scores = more progress toward their personal goals
+
+    You MUST:
+    1. Reiterate each agent’s goal.
+    2. Analyze the interaction in relation to that goal.
+    3. Provide a clear and logical explanation in the `reasoning` field.
+    4. Provide an integer score in the `score` field.
+    5. Align actions and dialogue with their defined personality vectors.
+
+    ### Output Format ###
+    Your response must follow this structure:
+
+    - **Agent A**  
+        -- Score: [0–10]  
+        -- Reasoning: [explanation of how the agent’s actions aligned with their goal and personality]  
+
+    - **Agent B**  
+        -- Score: [0–10]  
+        -- Reasoning: [same as above] 
+    """
+    user_message = f"""
+    ### Task ###
+    Evaluate the simulated social interaction below.
+
+    **Interaction:** {interaction}
+
+    **Character 1 (Agent A):** {agent1}  
+    **Personality Vector:** {personality1}  
+    **Goal:** {first_agent_goal}  
+
+    **Character 2 (Agent B):** {agent2}  
+    **Personality Vector:** {personality2}  
+    **Goal:** {second_agent_goal}  
+
+    **Scenario:** {scenario}  
+    **Setting:** {setting}  
+    **Topic:** {topic}  
+
+    Ensure your evaluation reflects alignment with both personal goals and personality vectors.
+    Follow the provided format exactly.
+    """
+
+    messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
+        ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipeline = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+    # Generate output
+    result = jsonformer_pipeline()
+    return result
+
+
+def evaluation_prompt_shared_goal(interaction, agent1,agent2, goal, scenario, personality1, personality2, model, tokenizer):
+    json_format = {
+    "type": "object",
+    "properties": {
+        "shared_goal_completion" : {"type" : "number"},
+        "reasoning" : {"type" : "string"},
+        "agent1_share" : {"type" : "number"},
+        "agent2_share" : {"type" : "number"}
+    },
+    "required": ["shared_goal_completion", "agent1_share", "agent2_share"]
+    }
+    system_message = f"""
+    ### Instruction ###
+    You are an expert in behavioral psychology and personality analysis.
+
+    Your task is to analyze the interaction between two agents within a specific scenario. Each agent has a unique personality defined by a vector. The agents share a common goal. Based on their interaction and the surrounding scenario, your job is to:
+
+    1. Evaluate the **degree of completion** of the shared goal on a scale from 0 to 10.
+    2. Determine **how much each agent contributed** to the shared goal, expressed as a floating point share between 0.0 and 1.0.
+    - The sum of both agents' shares must equal exactly 1.0.
+    - The agent who contributed more will have the higher share.
+
+    Additionally, provide **clear and concise reasoning** for the goal completion score.
+
+    ### Output Format ###
+    Use the following JSON structure:
+    {json_format}
+
+    Include:
+    - "shared_goal_completion": integer from 0 to 10
+    - "reasoning": concise paragraph explaining the score
+    - "agent1_share": float (0.0 to 1.0)
+    - "agent2_share": float (0.0 to 1.0)
+
+    ### Constraints ###
+    - Sum of agent1_share and agent2_share must equal **1.0**
+    - Base your answer strictly on the interaction, personality vectors, scenario context and shared goal
+    - Ensure logical consistency between reasoning, completion score, and agent shares
+    """
+    user_message = f"""
+    Evaluate the following simulated interaction:
+
+    🔹 **Interaction**: {interaction}
+
+    🔹 **Shared Goal**: {goal}
+
+    🔹 **Scenario**: {scenario}
+
+    🔹 **Agent 1**: {agent1} | Personality Vector: {personality1}
+
+    🔹 **Agent 2**: {agent2} | Personality Vector: {personality2}
+
+    You MUST follow the format exactly and ensure that the shared goal completion score, agent contributions, and reasoning are clearly and logically supported by the interaction.
+    """
+    messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
+        ]
+    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
+    # Use Jsonformer with the pipeline
+    jsonformer_pipeline = Jsonformer(
+        model, 
+        tokenizer,  # Use the pipeline object
+        json_schema=json_format,
+        prompt=prompt,
+        max_string_token_length=1000
+    )
+    # Generate output
+    result = jsonformer_pipeline()
+    return result
+
+
 def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, model, tokenizer):
     json_format = {
     "type": "object",
@@ -287,7 +450,7 @@ def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_
         }
     },
     "required": ["Agent A", "Agent B"]
-}
+    }
     # System message setting up the task for Llama
     system_message = """
     #### Persona: ###
