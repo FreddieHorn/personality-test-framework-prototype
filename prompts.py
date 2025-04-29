@@ -362,10 +362,10 @@ def evaluation_prompt_shared_goal(interaction, agent1,agent2, goal, scenario, pe
     json_format = {
     "type": "object",
     "properties": {
-        "shared_goal_completion" : {"type" : "number"},
+        "shared_goal_completion" : {"type" : "string"},
         "reasoning" : {"type" : "string"},
-        "agent1_share" : {"type" : "number"},
-        "agent2_share" : {"type" : "number"}
+        "agent1_share" : {"type" : "string"},
+        "agent2_share" : {"type" : "string"}
     },
     "required": ["shared_goal_completion", "agent1_share", "agent2_share"]
     }
