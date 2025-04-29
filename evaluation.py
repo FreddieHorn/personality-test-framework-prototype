@@ -49,29 +49,30 @@ def evaluation(input_csv: str, output_csv: str, model, tokenizer):
             shared_goal_completion.append(float(shared_goal_result["shared_goal_completion"]))
             print(f"shared_goal_completion Score: {shared_goal_result["shared_goal_completion"]}")
         except:
-            shared_goal_completion.append(0)
-            print("Skipping shared completion row, adjust manually")
+            shared_goal_completion.append(shared_goal_result["shared_goal_completion"])
+            print("error in shared completion row - attaching strings, adjust manually")
         try: 
             agent1_shares.append(float(shared_goal_result["agent1_share"]))
             print(f"agent 1 share Score: {shared_goal_result["agent1_share"]}")
         except:
-            agent1_shares.append(0)
-            print("Skipping agent 1 share row, adjust manually")
+            agent1_shares.append(shared_goal_result["agent1_share"])
+            print("error in agent 1 share row attaching string, adjust manually")
         try: 
             agent2_shares.append(float(shared_goal_result["agent2_share"]))
             print(f"agent 2 share Score: {shared_goal_result["agent2_share"]}")
         except:
-            agent2_shares.append(0)
-            print("Skipping agent 2 share row, adjust manually")
+            agent2_shares.append(shared_goal_result["agent2_share"])
+            print("error in agent 2 share row attaching string, adjust manually")
         try:
-            scores_agent_1.append(float(result["Agent A"]["Goal"]["score"]))
+            scores_agent_1.append(float(result["Agent B"]["Goal"]["score"]))
             scores_agent_2.append(float(result["Agent B"]["Goal"]["score"]))
         except:
-            scores_agent_1.append(0)
-            scores_agent_2.append(0)
-            print("Skipping row, adjust manually")
+            scores_agent_1.append(result["Agent B"]["Goal"]["score"])
+            scores_agent_2.append(result["Agent B"]["Goal"]["score"])
+            print("Attaching strings, adjust manually")
         results.append(result)
         print(result) 
+        print(f"Shared goal completion: {shared_goal_completion[-1]}")
      # Save results
     data["Character 1 evaluation"] = [result.get("Agent A", "") for result in results]
     data["Character 2 evaluation"] = [result.get("Agent B", "") for result in results]
