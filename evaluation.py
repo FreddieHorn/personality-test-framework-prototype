@@ -3,11 +3,13 @@ import numpy as np
 from scenario_generation import narrative_coherence_emb_score, semantic_alignment_emb_score, cosine_similarity, get_embedding
 from prompts import scenario_receptiveness_prompt, scenario_semantic_alignment_prompt, scenario_narrative_cohesiveness_score, evaluation_prompt_personal_goal, evaluation_prompt_shared_goal
 import re
+from logging import getLogger
+log = getLogger(__name__)
 
 def evaluation(input_csv: str, output_csv: str, model, tokenizer):
     # Load the input data
     data = pd.read_csv(input_csv)
-    print("read CSV")
+    log.info("read CSV")
     # Process rows
     results = []
     conversation = []
@@ -47,32 +49,32 @@ def evaluation(input_csv: str, output_csv: str, model, tokenizer):
         shared_goal_reasonings.append(shared_goal_result["reasoning"])
         try: 
             shared_goal_completion.append(float(shared_goal_result["shared_goal_completion"]))
-            print(f"shared_goal_completion Score: {shared_goal_result["shared_goal_completion"]}")
+            log.info(f"shared_goal_completion Score: {shared_goal_result['shared_goal_completion']}")
         except:
             shared_goal_completion.append(shared_goal_result["shared_goal_completion"])
-            print("error in shared completion row - attaching strings, adjust manually")
+            log.info("error in shared completion row - attaching strings, adjust manually")
         try: 
             agent1_shares.append(float(shared_goal_result["agent1_share"]))
-            print(f"agent 1 share Score: {shared_goal_result["agent1_share"]}")
+            log.info(f"agent 1 share Score: {shared_goal_result['agent1_share']}")
         except:
             agent1_shares.append(shared_goal_result["agent1_share"])
-            print("error in agent 1 share row attaching string, adjust manually")
+            log.info("error in agent 1 share row attaching string, adjust manually")
         try: 
             agent2_shares.append(float(shared_goal_result["agent2_share"]))
-            print(f"agent 2 share Score: {shared_goal_result["agent2_share"]}")
+            log.info(f"agent 2 share Score: {shared_goal_result['agent2_share']}")
         except:
             agent2_shares.append(shared_goal_result["agent2_share"])
-            print("error in agent 2 share row attaching string, adjust manually")
+            log.info("error in agent 2 share row attaching string, adjust manually")
         try:
             scores_agent_1.append(float(result["Agent B"]["Goal"]["score"]))
             scores_agent_2.append(float(result["Agent B"]["Goal"]["score"]))
         except:
             scores_agent_1.append(result["Agent B"]["Goal"]["score"])
             scores_agent_2.append(result["Agent B"]["Goal"]["score"])
-            print("Attaching strings, adjust manually")
+            log.info("Attaching strings, adjust manually")
         results.append(result)
-        print(result) 
-        print(f"Shared goal completion: {shared_goal_completion[-1]}")
+        log.info(result) 
+        log.info(f"Shared goal completion: {shared_goal_completion[-1]}")
      # Save results
     data["Character 1 evaluation"] = [result.get("Agent A", "") for result in results]
     data["Character 2 evaluation"] = [result.get("Agent B", "") for result in results]
@@ -82,15 +84,15 @@ def evaluation(input_csv: str, output_csv: str, model, tokenizer):
     data["Agent 2 Shares"] = agent2_shares
 
     data["Character 2 evaluation"] = [result.get("Agent B", "") for result in results]
-    print(f"Average Score for agent 1: {sum(scores_agent_1)/ len(scores_agent_1)}")
-    print(f"Average Score for agent 2: {sum(scores_agent_2)/ len(scores_agent_2)}")
+    log.info(f"Average Score for agent 1: {sum(scores_agent_1)/ len(scores_agent_1)}")
+    log.info(f"Average Score for agent 2: {sum(scores_agent_2)/ len(scores_agent_2)}")
     
     data.to_csv(output_csv, index=False)
-    print(f"Results saved to {output_csv}")
+    log.info(f"Results saved to {output_csv}")
 
 def evaluate_scenarios(input_csv: str, output_csv: str, model, tokenizer):
     data = pd.read_csv(input_csv)
-    print("read CSV")
+    log.info("read CSV")
     # Process rows
     sem_align_scores = []
     COH_scores = []
@@ -128,24 +130,24 @@ def evaluate_scenarios(input_csv: str, output_csv: str, model, tokenizer):
             sem_align_scores.append(float(semantic_alignment_score["semantic_alignment_score"]))
         except:
             sem_align_scores.append(0)
-            print(f"Error in sem_align_scores- adjust manually")
+            log.warning(f"Error in sem_align_scores- adjust manually")
         try:
             COH_scores.append(float(sem_COH_score["narrative_cohesiveness_score"]))
         except:
             COH_scores.append(0)
-            print(f"Error in COH score - adjust manually")
+            log.warning(f"Error in COH score - adjust manually")
         try:
             receptiveness_scores.append(float(receptiveness_score["receptiveness_score"]))
         except:
             receptiveness_scores.append(0)
-            print(f"Error in receptivenes score - adjust manually")
+            log.warning(f"Error in receptivenes score - adjust manually")
 
-        print(f"Scenario: {row["scenario"]}")
-        print(f"Scenario alignment scores: {semantic_alignment_score["semantic_alignment_score"]}")
-        print(f"Semantic Receptiveness score: {receptiveness_score["receptiveness_score"]}")
-        print(f"Narrative Coherence score: {sem_COH_score["narrative_cohesiveness_score"]}")
-        print(f"Scenario alignment EMBEDDING scores: {semantic_alignment_embedding_score}")
-        print(f"Narrative Coherence EMBEDDING score: {narrative_coherence_embedding_score}")
+        log.info(f"Scenario: {row['scenario']}")
+        log.info(f"Scenario alignment scores: {semantic_alignment_score['semantic_alignment_score']}")
+        log.info(f"Semantic Receptiveness score: {receptiveness_score['receptiveness_score']}")
+        log.info(f"Narrative Coherence score: {sem_COH_score['narrative_cohesiveness_score']}")
+        log.info(f"Scenario alignment EMBEDDING scores: {semantic_alignment_embedding_score}")
+        log.info(f"Narrative Coherence EMBEDDING score: {narrative_coherence_embedding_score}")
         
     data["Scenario Receptiveness Score"] = receptiveness_scores
     data["Semantic Alignment Score"] = sem_align_scores
@@ -154,11 +156,11 @@ def evaluate_scenarios(input_csv: str, output_csv: str, model, tokenizer):
     data["Narrative Embedding COH"] = narrative_COH_emb_scores
         
     data.to_csv(output_csv, index=False)
-    print(f"Results saved to {output_csv}")
+    log.info(f"Results saved to {output_csv}")
 
 def evaluate_interactions(input_csv: str, output_csv: str, model, tokenizer):
     data = pd.read_csv(input_csv)
-    print("read CSV")
+    log.info("read CSV")
     narrative_coherence_scores = []
     sem_align_scores = []
     for _, row in data.iterrows():
@@ -170,13 +172,13 @@ def evaluate_interactions(input_csv: str, output_csv: str, model, tokenizer):
                                                                 scenario_text=row["scenario"])
         sem_align_scores.append(sem_align_score)
 
-        print(f"Interaction alignment scores: {sem_align_score }")
-        print(f"Narrative Coherence score: {narrative_coherence_score}")
+        log.info(f"Interaction alignment scores: {sem_align_score }")
+        log.info(f"Narrative Coherence score: {narrative_coherence_score}")
     
     data["Semantic Alignment Score Interactions"] = sem_align_scores
     data["Narrative COH Interactions"] = narrative_coherence_scores
     data.to_csv(output_csv, index=False)
-    print(f"Results saved to {output_csv}")
+    log.info(f"Results saved to {output_csv}")
 
 
 def split_dialogue_by_speakers(text, agent1, agent2):

@@ -4,6 +4,9 @@ import numpy as np
 import re
 from transformers import AutoModel, AutoTokenizer
 from prompts import scenario_creation_prompt, concept_agent_prompt, narrative_agent_prompt, logical_consistency_agent_prompt, conflict_agent_prompt
+from logging import getLogger
+log = getLogger(__name__)
+
 emb_model_name = "sentence-transformers/all-MiniLM-L6-v2"
 emb_tokenizer = AutoTokenizer.from_pretrained(emb_model_name)
 emb_model = AutoModel.from_pretrained(emb_model_name)
@@ -14,7 +17,7 @@ def scenario_generation(input_csv: str, output_csv: str,  model, tokenizer, mode
 
     # Process rows
     results = []
-    print(f"Generating Scenarios for temperature {temperature} and mode: {mode}")
+    log.info(f"Generating Scenarios for temperature {temperature} and mode: {mode}")
     if mode == 'default':
         for _, row in data.iterrows():
             result = scenario_creation_prompt(
@@ -27,7 +30,7 @@ def scenario_generation(input_csv: str, output_csv: str,  model, tokenizer, mode
                 tokenizer = tokenizer
             )
             results.append(result)
-            print(result) 
+            log.info(result) 
     elif mode == 'agentic':
         for _, row in data.iterrows():
             agent1_name = row["Character1"], 
@@ -53,7 +56,7 @@ def scenario_generation(input_csv: str, output_csv: str,  model, tokenizer, mode
     data["first_agent_goal"] = [result.get("first_agent_goal", "") for result in results]
     data["second_agent_goal"] = [result.get("second_agent_goal", "") for result in results]
     data.to_csv(output_csv, index=False)
-    print(f"Results saved to {output_csv}")
+    log.info(f"Results saved to {output_csv}")
 
 def get_embedding(sentence):
     tokens = emb_tokenizer(sentence, return_tensors="pt", padding=True, truncation=True)

@@ -646,7 +646,6 @@ def generate_interaction_prompt(agent1,agent2, goal, first_agent_goal, second_ag
     return result
 
 def goal_completion_rate_prompt(interaction, previous_scores, agent1, agent2, shared_goal, first_agent_goal, second_agent_goal, scenario, model, tokenizer):
-    print("in the prompt")
     json_format = {
         "type": "object",
         "properties": {
@@ -688,7 +687,6 @@ def goal_completion_rate_prompt(interaction, previous_scores, agent1, agent2, sh
         {"role": "user", "content": user_message},
     ]
     prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    print("applied message")
     # Use Jsonformer with the pipeline
     jsonformer_pipelinew = Jsonformer(
         model, 
@@ -697,10 +695,8 @@ def goal_completion_rate_prompt(interaction, previous_scores, agent1, agent2, sh
         prompt=prompt,
         max_string_token_length=1000
     )
-    print("declared former")
     # Generate output
     result = jsonformer_pipelinew()
-    print("after pipeline")
     return result
 
 

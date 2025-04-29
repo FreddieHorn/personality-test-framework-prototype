@@ -1,9 +1,11 @@
 import json
 import pandas as pd
 from prompts import generate_interaction_prompt, agent_prompt, goal_completion_rate_prompt
+from logging import getLogger
+log = getLogger(__name__)
 
 def generate_interaction(input_csv: str, output_csv: str, model, tokenizer, mode = "default"):
-    print("_______GENERATING INTERACTION____________")
+    log.info("_______GENERATING INTERACTION____________")
     data = pd.read_csv(input_csv)
     # Process rows
     if mode == "default":
@@ -24,13 +26,13 @@ def generate_interaction(input_csv: str, output_csv: str, model, tokenizer, mode
             for i in range(1, 21, 2):
                 response = agent_prompt(agent_1_name, scenario, setting, 
                 shared_goal, first_agent_goal, personality1, interaction, model = model, tokenizer = tokenizer, turn = i-1)
-                interaction+=f"{agent_1_name}:{response["response"]}\n"
+                interaction+=f"{agent_1_name}:{response['response']}\n"
                 response = agent_prompt(agent_2_name, scenario, setting, 
                 shared_goal, second_agent_goal, personality2, interaction, model = model, tokenizer = tokenizer, turn = i)
-                interaction+=f"{agent_2_name}:{response["response"]}\n"
+                interaction+=f"{agent_2_name}:{response['response']}\n"
 
             results.append(interaction)
-            print(interaction)
+            log.info(interaction)
         data["interaction"] = results
     elif mode == "script":
         results = []
@@ -56,4 +58,4 @@ def generate_interaction(input_csv: str, output_csv: str, model, tokenizer, mode
      # Save results
     
     data.to_csv(output_csv, index=False)
-    print(f"Results saved to {output_csv}")
+    log.info(f"Results saved to {output_csv}")
