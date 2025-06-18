@@ -5,13 +5,15 @@ import re
 from transformers import AutoModel, AutoTokenizer
 from prompts import scenario_creation_prompt, concept_agent_prompt, narrative_agent_prompt, logical_consistency_agent_prompt, conflict_agent_prompt
 from logging import getLogger
+from openai import OpenAI
+
 log = getLogger(__name__)
 
 emb_model_name = "sentence-transformers/all-MiniLM-L6-v2"
 emb_tokenizer = AutoTokenizer.from_pretrained(emb_model_name)
 emb_model = AutoModel.from_pretrained(emb_model_name)
 
-def scenario_generation(input_csv: str, output_csv: str,  model, tokenizer, mode = 'default', temperature = 1):
+def scenario_generation(input_csv: str, output_csv: str, client: OpenAI, mode = 'default', temperature = 1):
     # Load the input data
     data = pd.read_csv(input_csv)
 
@@ -26,8 +28,7 @@ def scenario_generation(input_csv: str, output_csv: str,  model, tokenizer, mode
                 agent_1_name = row["Character1"],
                 agent_2_name = row["Character2"],
                 temperature = temperature,
-                model = model,
-                tokenizer = tokenizer
+                client=client,
             )
             results.append(result)
             log.info(result) 
@@ -35,19 +36,27 @@ def scenario_generation(input_csv: str, output_csv: str,  model, tokenizer, mode
         for _, row in data.iterrows():
             agent1_name = row["Character1"], 
             agent2_name= row["Character2"], 
-            setting=row["Setting"],
-            topic=row["Topic"],
+            goal_category=row["goal_category"],
+            first_agent_goal=row["first_agent_goal"],
+            second_agent_goal=row["second_agent_goal"],
+            shared_goal=row["shared_goal"],
+            agent1_role=row["agent1_role"],
+            agent2_role=row["agent2_role"]
             step_1_scenario = concept_agent_prompt(agent1_name, 
                                                 agent2_name, 
-                                                setting,
-                                                topic,
-                                                model=model, tokenizer=tokenizer)
+                                                goal_category,
+                                                first_agent_goal,
+                                                second_agent_goal,
+                                                shared_goal,
+                                                agent1_role,
+                                                agent2_role,
+                                                client=client)
             shared_goal = step_1_scenario["shared_goal"]
             first_agent_goal = step_1_scenario["first_agent_goal"]
             second_agent_goal = step_1_scenario["second_agent_goal"]
-            step_2_scenario = narrative_agent_prompt(step_1_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, model=model, tokenizer=tokenizer)
-            step_3_scenario = conflict_agent_prompt(step_2_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, model=model, tokenizer = tokenizer, temperature = temperature)
-            result_scenario = logical_consistency_agent_prompt(step_3_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, model = model, tokenizer = tokenizer)
+            step_2_scenario = narrative_agent_prompt(step_1_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client=client)
+            step_3_scenario = conflict_agent_prompt(step_2_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client=client, temperature=temperature)
+            result_scenario = logical_consistency_agent_prompt(step_3_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client=client)
             results.append(result_scenario)
 
      # Save results

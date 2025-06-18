@@ -1,6 +1,6 @@
-from jsonformer import Jsonformer
-
-def scenario_narrative_cohesiveness_score(scenario, model, tokenizer):
+from openai import OpenAI
+import json
+def scenario_narrative_cohesiveness_score(scenario, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
         "type": "object",
         "properties": {
@@ -59,21 +59,22 @@ def scenario_narrative_cohesiveness_score(scenario, model, tokenizer):
         {"role": "system", "content": system_message},
         {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            "type" : "json_schema",
+            "json_schema": {
+                "strict" : True,
+                "schema" : json_format
+            }
+        },
+        messages=messages,
+        max_tokens=1000,
     )
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
+    return completion.choices[0].message
 
-
-def scenario_semantic_alignment_prompt(scenario, setting, topic, model, tokenizer):
+def scenario_semantic_alignment_prompt(scenario, setting, topic, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
         "type": "object",
         "properties": {
@@ -135,20 +136,22 @@ def scenario_semantic_alignment_prompt(scenario, setting, topic, model, tokenize
         {"role": "system", "content": system_message},
         {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            "type" : "json_schema",
+            "json_schema": {
+                "strict" : True,
+                "schema" : json_format
+            }
+        },
+        messages=messages,
+        max_tokens=1000,
     )
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
+    return completion.choices[0].message
 
-def scenario_receptiveness_prompt(scenario, model, tokenizer):
+def scenario_receptiveness_prompt(scenario, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
         "type": "object",
         "properties": {
@@ -204,19 +207,22 @@ def scenario_receptiveness_prompt(scenario, model, tokenizer):
         {"role": "system", "content": system_message},
         {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            "type" : "json_schema",
+            "json_schema": {
+                "strict" : True,
+                "schema" : json_format
+            }
+        },
+        messages=messages,
+        max_tokens=1000,
     )
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
-def agent_prompt(agent_name: str, scenario: str, setting:str, shared_goal: str, agent_goal: str, personality: dict, interaction: str, turn: int, model, tokenizer):
+    return completion.choices[0].message
+
+def agent_prompt(agent_name: str, scenario: str, setting:str, shared_goal: str, agent_goal: str, personality: dict, interaction: str, turn: int, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
         "type": "object",
         "properties": {
@@ -255,19 +261,21 @@ def agent_prompt(agent_name: str, scenario: str, setting:str, shared_goal: str, 
         {"role": "system", "content": system_message},
         {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            "type" : "json_schema",
+            "json_schema": {
+                "strict" : True,
+                "schema" : json_format
+            }
+        },
+        messages=messages,
+        max_tokens=1000,
     )
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
-def evaluation_prompt_personal_goal(interaction,agent1,agent2, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, model, tokenizer):
+    return completion.choices[0].message
+def evaluation_prompt_personal_goal(interaction,agent1,agent2, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
     "type": "object",
     "properties": {
@@ -344,21 +352,23 @@ def evaluation_prompt_personal_goal(interaction,agent1,agent2, first_agent_goal,
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            "type" : "json_schema",
+            "json_schema": {
+                "strict" : True,
+                "schema" : json_format
+            }
+        },
+        messages=messages,
+        max_tokens=1000,
     )
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
+    return completion.choices[0].message
 
 
-def evaluation_prompt_shared_goal(interaction, agent1,agent2, goal, scenario, personality1, personality2, model, tokenizer):
+def evaluation_prompt_shared_goal(interaction, agent1,agent2, goal, scenario, personality1, personality2, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
     "type": "object",
     "properties": {
@@ -416,21 +426,23 @@ def evaluation_prompt_shared_goal(interaction, agent1,agent2, goal, scenario, pe
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            "type" : "json_schema",
+            "json_schema": {
+                "strict" : True,
+                "schema" : json_format
+            }
+        },
+        messages=messages,
+        max_tokens=1000,
     )
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
+    return completion.choices[0].message
 
 
-def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, model, tokenizer):
+def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
     "type": "object",
     "properties": {
@@ -500,21 +512,23 @@ def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            "type" : "json_schema",
+            "json_schema": {
+                "strict" : True,
+                "schema" : json_format
+            }
+        },
+        messages=messages,
+        max_tokens=1000,
     )
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
+    return completion.choices[0].message
 
 
-def scenario_creation_prompt(setting, topic, agent_1_name, agent_2_name, temperature, model, tokenizer):    # Define the JSON structure for the result
+def scenario_creation_prompt(setting, topic, agent_1_name, agent_2_name, temperature, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):    # Define the JSON structure for the result
     json_format = {
         "type": "object",
         "properties": {
@@ -555,21 +569,22 @@ def scenario_creation_prompt(setting, topic, agent_1_name, agent_2_name, tempera
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            "type" : "json_schema",
+            "json_schema": {
+                "strict" : True,
+                "schema" : json_format
+            }
+        },
+        messages=messages,
+        max_tokens=1000,
     )
+    return completion.choices[0].message
 
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
-
-def generate_interaction_prompt(agent1,agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, model, tokenizer):    # Define the JSON structure for the result
+def generate_interaction_prompt(agent1,agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):    # Define the JSON structure for the result
     json_format = {
         "type": "object",
         "properties": {
@@ -630,22 +645,22 @@ def generate_interaction_prompt(agent1,agent2, goal, first_agent_goal, second_ag
         {"role": "system", "content": system_message},
         {"role": "user", "content": user_message},
     ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            "type" : "json_schema",
+            "json_schema": {
+                "strict" : True,
+                "schema" : json_format
+            }
+        },
+        messages=messages,
+        max_tokens=1000,
     )
+    return completion.choices[0].message
 
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
-
-def goal_completion_rate_prompt(interaction, previous_scores, agent1, agent2, shared_goal, first_agent_goal, second_agent_goal, scenario, model, tokenizer):
+def goal_completion_rate_prompt(interaction, previous_scores, agent1, agent2, shared_goal, first_agent_goal, second_agent_goal, scenario, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
         "type": "object",
         "properties": {
@@ -686,47 +701,48 @@ def goal_completion_rate_prompt(interaction, previous_scores, agent1, agent2, sh
         {"role": "system", "content": system_message},
         {"role": "user", "content": user_message},
     ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipelinew = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
-    )
-    # Generate output
-    result = jsonformer_pipelinew()
-    return result
-
-
-def concept_agent_prompt(agent1_name, agent2_name, setting, topic, model, tokenizer):
-    json_format = {
-        "type": "object",
-        "properties": {
-            "scenario": {"type": "string"},
-            "shared_goal": {"type": "string"},
-            "first_agent_goal" : {"type" : "string"},
-            "second_agent_goal" : {"type" : "string"}
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            "type" : "json_schema",
+            "json_schema": {
+                "strict" : True,
+                "schema" : json_format
+            }
         },
-        "required": ["scenario"]
+        messages=messages,
+        max_tokens=1000,
+    )
+    return completion.choices[0].message
+
+
+def concept_agent_prompt(agent1_name, agent2_name, goal_category, first_agent_goal, second_agent_goal, shared_goal, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
+    json_format = {
+        "scenario": "string",
+        "shared_goal": "string",
+        "first_agent_goal" : "string",
+        "second_agent_goal" : "string"
     }
     system_message = f"""
     ### PERSONA ###
-    You are an expert in narrative design and ethical dilemma creation. Your role is to craft a **compelling, dilemma-driven scenario** based on the provided setting, topic, and agents.
+    You are an expert in narrative design and ethical dilemma creation. Your role is to craft a **compelling, dilemma-driven scenario** based on the provided goal category, agents, their prototype for personal and shared goals.
 
     ### TASK REQUIREMENTS ###
     - The scenario should be **rich in conflict**, featuring high stakes and a **difficult decision** that forces moral, ethical, or strategic choices.
-    - The **setting** provides the backdrop (e.g., corporate, survival, military).
-    - The **topic** specifies a focused issue (e.g., corporate espionage, food scarcity, ethical AI deployment).
+    - The **goal category** provides the thematic framework for the scenario, guiding the nature of the conflict and the agents' interactions.
+    - The **personal goals** of each agent must be clearly defined and should drive their actions and decisions within the scenario. You can refine the provided goals so that they can provide more tension between the characters.
+    - The **shared goal** must be a **common objective** that both agents strive for, even if they have **different methods or priorities** in achieving it.
     - The **agents** are key players in the scenario, each with **distinct roles, motivations, and potential conflicts**.
     - The scenario must be **open-ended**, allowing for multiple perspectives and possible resolutions.
+    - Agent **roles** are clearly defined, and will affect how they interact with each other and the scenario.
     - **Personal Goals**:  
-        - Create **a unique personal goal** for each key agent, rooted in their **motivations, values, and interests** that they will try to achieve in the scenario.  
+        - Refine **the unique personal goal** for each key agent, rooted in their **motivations, values, and interests** that they will try to achieve in the scenario. 
+        - Goals are provided, but you can refine them to make them more specific and impactful for the scenario.
         - Ensure these goals create **tension** by introducing conflicting priorities or ethical dilemmas.  
     - **Shared Goal**:  
-        - Define a **common objective** that both agents strive for, even if they **disagree on how to achieve it**.  
-        - This goal should **force collaboration, negotiation, or conflict resolution** between the agents.  
+        - Refine the **shared goal** to ensure it is a **common objective** that both agents strive for, even if they have **different methods or priorities** in achieving it.
+        - The shared goal is provided, but you can refine it to make it more specific and impactful for the scenario.
 
     ### CONSTRAINTS ###
     1. **Use only the predefined agents** provided in the configuration.
@@ -741,10 +757,14 @@ def concept_agent_prompt(agent1_name, agent2_name, setting, topic, model, tokeni
     """
     user_message =f"""
     ### CONFIGURATION ### 
-    - Setting: {setting}
-    - Topic: {topic}
+    - Goal Category: {goal_category}
+    - prototype of first agent goal: {first_agent_goal}
+    - prototype of second agent goal: {second_agent_goal}
+    - prototype of shared goal: {shared_goal}
     - Agent 1: {agent1_name}
+    - Agent 1 role: {agent1_role}
     - Agent 2: {agent2_name}
+    - Agent 2 role: {agent2_role}
     ### Task ###
     Generate a dilemma-driven scenario that aligns with the above configuration.
     Ensure it includes:
@@ -756,36 +776,35 @@ def concept_agent_prompt(agent1_name, agent2_name, setting, topic, model, tokeni
     **Important**: Provide only the refined scenario without additional commentary or explanations.
     
     Now create a scenario.
+    
+    ### Warning ###
+    Only provide a json object with the following keys: scenario, shared_goal, first_agent_goal, second_agent_goal. Without any additional commentary or explanations.
+    
     """
     messages = [
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
-    )
-
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
-
-
-def narrative_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal,agent1_name, agent2_name, model, tokenizer):
-    json_format = {
-        "type": "object",
-        "properties": {
-            "scenario": {"type": "string"},
-            "shared_goal": {"type": "string"},
-            "first_agent_goal" : {"type" : "string"},
-            "second_agent_goal" : {"type" : "string"}
+    completion = client.chat.completions.create(
+        extra_body={}, # here we can declare a provider if needed 
+        model=model_name,
+        response_format={
+            'type': 'json_object'
         },
-        "required": ["scenario"]
+        messages=messages,
+        max_tokens=1000,
+    )
+    try:
+        return json.loads(completion.choices[0].message.content)
+    except json.JSONDecodeError:
+        return {"error": "Failed to parse JSON from response."}
+
+def narrative_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free", temperature = 1):
+    json_format = {
+        "scenario": "string",
+        "shared_goal": "string",
+        "first_agent_goal" : "string",
+        "second_agent_goal" : "string",
     }
     system_message = f"""
     ### PERSONA ###
@@ -815,6 +834,8 @@ def narrative_agent_prompt(input_scenario, shared_goal, first_agent_goal, second
     ### GOALS ###
     {agent1_name} goal: {first_agent_goal} 
     {agent2_name} goal: {second_agent_goal} 
+    {agent1_name} role: {agent1_role}
+    {agent2_name} role: {agent2_role}
     Shared goal: {shared_goal}
     ### TASK ###
     Refine the scenario according to the given input, ensuring:
@@ -830,30 +851,27 @@ def narrative_agent_prompt(input_scenario, shared_goal, first_agent_goal, second
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
-    )
 
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
-
-def logical_consistency_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal,agent1_name, agent2_name, model, tokenizer):
-    json_format = {
-        "type": "object",
-        "properties": {
-            "scenario": {"type": "string"},
-            "shared_goal": {"type": "string"},
-            "first_agent_goal" : {"type" : "string"},
-            "second_agent_goal" : {"type" : "string"}
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            'type': 'json_object'
         },
-        "required": ["scenario"]
+        messages=messages,
+        max_tokens=1000,
+    )
+    try:
+        return json.loads(completion.choices[0].message.content)
+    except json.JSONDecodeError:
+        return {"error": "Failed to parse JSON from response."}
+
+def logical_consistency_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free", temperature = 1):
+    json_format = {
+        "scenario": "string",
+        "shared_goal": "string",
+        "first_agent_goal" : "string",
+        "second_agent_goal" : "string",
     }
     system_message = f"""
     ### PERSONA ###
@@ -883,6 +901,9 @@ def logical_consistency_agent_prompt(input_scenario, shared_goal, first_agent_go
     ### GOALS ###
     {agent1_name} goal: {first_agent_goal} 
     {agent2_name} goal: {second_agent_goal} 
+    {agent1_name} role: {agent1_role}
+    {agent2_name} role: {agent2_role}
+    shared goal: {shared_goal}
     ### Task ###
     Refine the scenario based on logical consistency, ensuring:
     - Stronger character motivations and coherent world-building.
@@ -895,30 +916,27 @@ def logical_consistency_agent_prompt(input_scenario, shared_goal, first_agent_go
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
-    )
 
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
-
-def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, model, tokenizer,  temperature = 1):
-    json_format = {
-        "type": "object",
-        "properties": {
-            "scenario": {"type": "string"},
-            "shared_goal": {"type": "string"},
-            "first_agent_goal" : {"type" : "string"},
-            "second_agent_goal" : {"type" : "string"}
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            'type': 'json_object'
         },
-        "required": ["scenario"]
+        messages=messages,
+        max_tokens=1000,
+    )
+    try:
+        return json.loads(completion.choices[0].message.content)
+    except json.JSONDecodeError:
+        return {"error": "Failed to parse JSON from response."}
+
+def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free", temperature = 1):
+    json_format = {
+        "scenario": "string",
+        "shared_goal": "string",
+        "first_agent_goal" : "string",
+        "second_agent_goal" : "string",
     }
     system_message = f"""
     ### PERSONA ###
@@ -967,6 +985,9 @@ def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_
     ### GOALS ###
     {agent1_name} goal: {first_agent_goal} 
     {agent2_name} goal: {second_agent_goal} 
+    {agent1_name} role: {agent1_role}
+    {agent2_name} role: {agent2_role}
+    shared goal: {shared_goal}
     ### Task ###
     Refine the scenario according to the given input, ensuring:
     - Heightened conflict with stronger opposing viewpoints.
@@ -982,79 +1003,177 @@ def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-    # Use Jsonformer with the pipeline
-    jsonformer_pipeline = Jsonformer(
-        model, 
-        tokenizer,  # Use the pipeline object
-        json_schema=json_format,
-        prompt=prompt,
-        max_string_token_length=1000
+
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            'type': 'json_object'
+        },
+        messages=messages,
+        max_tokens=1000,
     )
+    try:
+        return json.loads(completion.choices[0].message.content)
+    except json.JSONDecodeError:
+        return {"error": "Failed to parse JSON from response."}
 
-    # Generate output
-    result = jsonformer_pipeline()
-    return result
+def choose_goal_prompt(base_goals: dict, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
+    json_format = {
+        "chosen_goal_category" : "string",
+    }
+    system_message = f"""
+    You are an expert in **goal selection and narrative design**.
+    Your task is to **choose a distinct goal category** for two characters based on their provided base goals abbreviations and labels. 
+    Two characters are presented with their base goals, and you must select most appropriate goal category that aligns with their motivations and the context of the scenario.
+    You are also provided with a list of possible goal categories to choose from.
+    ### GOAL CATEGORIES ###
+    - **Information Acquisition**: Goals focused on gathering knowledge, data, or insights.
+    - **Information Provision**: Goals centered on sharing knowledge, data, or insights with others.
+    - **Relationship Building**: Goals aimed at establishing or strengthening connections with others.
+    - **Relationship Maintenance**: Goals focused on sustaining existing relationships and ensuring their health.
+    - **Identity Recognition**: Goals related to gaining acknowledgment or validation of one's identity, beliefs, or values.
+    - **Cooperation**: Goals that involve working together with others towards a common objective.
+    - **Competition**: Goals that involve striving against others to achieve a specific outcome or recognition.
+    - **Conflict Resolution**: Goals aimed at resolving disputes or disagreements with others.
+    
+    ### OUTPUT FORMAT ###
+    Return the chosen goal type in the following **JSON format**:
+    {json_format}
+    """
+    user_message = f"""
+    ### INPUT ###
+    Base Goal Abbreviation 1: {base_goals["base_goal_abbreviation_1"]}
+    Base Goal Abbreviation 2: {base_goals["base_goal_abbreviation_2"]}
+    Base Goal Label 1: {base_goals["base_goal_label_1"]}
+    Base Goal Label 2: {base_goals["base_goal_label_2"]}
+    ### Task ###
+    Choose a distinct goal category for the character based on the provided information.
 
-# def goal_agent_prompt(input_scenario, model, tokenizer):
-#     json_format = {
-#         "type": "object",
-#         "properties": {
-#             "shared_goal": {"type": "string"},
-#             "first_agent_goal" : {"type" : "string"},
-#             "second_agent_goal" : {"type" : "string"}
-#         },
-#         "required": ["scenario"]
-#     }
-#     system_message = f"""
-#     You are an expert in **character-driven narrative design and conflict dynamics**.  
-#     Your role is to **define compelling goals** that drive the agents within the given scenario.  
+    **Important**: Provide only the chosen goal category without additional commentary or explanations.
+    **Important**: Numbers 1 and 2 in the base goal abbreviations refer to the first and second character respectively.
 
-#     ### OBJECTIVES ###
-#     - **Personal Goals**:  
-#     - Create **a unique personal goal** for each key agent, rooted in their **motivations, values, and interests**.  
-#     - Ensure these goals create **tension** by introducing conflicting priorities or ethical dilemmas.  
-#     - **Shared Goal**:  
-#     - Define a **common objective** that both agents strive for, even if they **disagree on how to achieve it**.  
-#     - This goal should **force collaboration, negotiation, or conflict resolution** between the agents.  
+    Now, choose the goal category.
+    """
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message},
+    ]
 
-#     ### CONSTRAINTS ###
-#     1. Ensure **personal goals** are **meaningful and deeply tied to the agents' backgrounds**.  
-#     2. The **shared goal must be essential to the scenario**, creating **stakes and urgency**.  
-#     3. **Do not introduce unnecessary details**—focus only on **goals and their narrative impact**.  
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            'type': 'json_object'
+        },
+        messages=messages,
+        max_tokens=1000,
+    )
+    try:
+        return json.loads(completion.choices[0].message.content)
+    except json.JSONDecodeError:
+        return {"error": "Failed to parse JSON from response."}
 
-#     ### OUTPUT FORMAT ###
-#     Return the goals in the following **JSON format**:
-#     ```json
-#     {json_format}
-#     ```
-#     """
-#     user_message =f"""
-#     ### INPUT SCENARIO ###
-#     {input_scenario}
-#     ### Task ###
-#     Define personal and shared goals for the agents in accordance with the scenario:
-#     - Personal Goals: Unique motivations for each agent that create tension or ideological conflict.
-#     - Shared Goal: A common objective that compels the agents to collaborate, compete, or resolve their differences.
+def extrapolate_goals_prompt(base_goals: dict, goal_category, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
+    json_format = {
+        "first_agent_extrapolated_goal": "string",
+        "second_agent_extrapolated_goal": "string",
+        "shared_goal": "string"
+    }
+    system_message = f"""
+    You are an expert in **goal extrapolation and narrative design**.
+    Your task is to **extrapolate specific personal goals** for two characters based on their provided base goals abbreviations, labels, and the chosen goal category.
+    Two characters are presented with their base goals and a goal category. Your task is to expand these base goals into more specific personal goals that align with the chosen goal category.
+    Moreover, you need to create a shared goal that both characters will try to achieve in the scenario.
+    ### EXAMPLE EXTRAPOLATION ###
+    Goal Category: Information Acquisition
+    Base Goal Abbreviation 1: Career
+    Base Goal Label 1: Having a career
+    Base Goal Abbreviation 2: Being free
+    Base Goal Label 2: Having freedom (being a free person)
+    Extrapolated Personal Goal 1: Wanting to acquire important information about the industry to advance in their career.
+    Extrapolated Personal Goal 2: Wanting to gather knowledge about the world to understand their place in it and maintain their freedom.
+    Shared Goal: Gather crucial information that will help them in their respective careers while ensuring they remain free individuals.
+    ### OUTPUT FORMAT ###
+    Return the extrapolated goals in the following **JSON format**:
+    {json_format}
+    """
+    user_message = f"""
+    ### INPUT ###
+    Base Goal Abbreviation 1: {base_goals["base_goal_abbreviation_1"]}
+    Base Goal Abbreviation 2: {base_goals["base_goal_abbreviation_2"]}
+    Base Goal Label 1: {base_goals["base_goal_label_1"]}
+    Base Goal Label 2: {base_goals["base_goal_label_2"]}
+    Goal Category: {goal_category}
+    ### Task ###
+    Extrapolate specific personal goals for the two characters based on their provided base goals and the chosen goal category.
+    **Important**: Provide only the chosen goal category without additional commentary or explanations.
+    """
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message},
+    ]
 
-#     **Important**: Provide only the goals without additional commentary or explanations.
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            'type': 'json_object'
+        },
+        messages=messages,
+        max_tokens=1000,
+    )
+    try:
+        return json.loads(completion.choices[0].message.content)
+    except json.JSONDecodeError:
+        return {"error": "Failed to parse JSON from response."}
 
-#     Now, generate the goals.
-#     """
-#     messages = [
-#             {"role": "system", "content": system_message},
-#             {"role": "user", "content": user_message},
-#         ]
-#     prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, return_tensors="pt")
-#     # Use Jsonformer with the pipeline
-#     jsonformer_pipeline = Jsonformer(
-#         model, 
-#         tokenizer,  # Use the pipeline object
-#         json_schema=json_format,
-#         prompt=prompt,
-#         max_string_token_length=1000
-#     )
+def generate_roles_prompt(agent1_name, agent2_name, goal_category, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
+    json_format = {
+        "agent1_role": "string",
+        "agent2_role": "string"
+    }
+    system_message = f"""
+    You are an expert in **role generation and narrative design**.
+    Your task is to **generate distinct roles** for two characters based on their names and goal category. 
+    The roles should reflect the characters' personalities, motivations, and the context of the scenario.
+    
+    ### OUTPUT FORMAT ###
+    Return the generated roles in the following **JSON format**:
+    {json_format}
+    """
+    
+    user_message = f"""
+    ### INPUT ###
+    Agent 1 Name: {agent1_name}
+    Agent 2 Name: {agent2_name}
+    Goal Category: {goal_category}
 
-#     # Generate output
-#     result = jsonformer_pipeline()
-#     return result
+    ### Task ###
+    Generate distinct roles for the two characters based on their names and goals.
+    
+    **Important**: Provide only the generated roles without additional commentary or explanations.
+    
+    Now, generate the roles.
+    """
+    
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": user_message},
+    ]
+
+    completion = client.chat.completions.create(
+        extra_body={},
+        model=model_name,
+        response_format={
+            'type': 'json_object'
+        },
+        messages=messages,
+        max_tokens=1000,
+    )
+    
+    try:
+        return json.loads(completion.choices[0].message.content)
+    except json.JSONDecodeError:
+        print(completion.choices[0].message.content)
+        return {"error": "Failed to parse JSON from response."}
