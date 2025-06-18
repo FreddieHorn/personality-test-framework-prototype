@@ -717,7 +717,7 @@ def goal_completion_rate_prompt(interaction, previous_scores, agent1, agent2, sh
     return completion.choices[0].message
 
 
-def concept_agent_prompt(agent1_name, agent2_name, goal_category, first_agent_goal, second_agent_goal, shared_goal, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
+def concept_agent_prompt(goal_category, first_agent_goal, second_agent_goal, shared_goal, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
         "scenario": "string",
         "shared_goal": "string",
@@ -726,14 +726,13 @@ def concept_agent_prompt(agent1_name, agent2_name, goal_category, first_agent_go
     }
     system_message = f"""
     ### PERSONA ###
-    You are an expert in narrative design and ethical dilemma creation. Your role is to craft a **compelling, dilemma-driven scenario** based on the provided goal category, agents, their prototype for personal and shared goals.
-
+    You are an expert in narrative design and ethical dilemma creation. Your role is to craft a **compelling, dilemma-driven scenario** based on the provided goal category, roles and the prototypes for personal and shared goals of the agents participating in the scenario.
+    The scenario will include two agents with distinct roles and goals, however the names for them are not provided. Instead, you will use the words "[Agent 1]" and "[Agent 2]" to refer to them.
     ### TASK REQUIREMENTS ###
     - The scenario should be **rich in conflict**, featuring high stakes and a **difficult decision** that forces moral, ethical, or strategic choices.
     - The **goal category** provides the thematic framework for the scenario, guiding the nature of the conflict and the agents' interactions.
     - The **personal goals** of each agent must be clearly defined and should drive their actions and decisions within the scenario. You can refine the provided goals so that they can provide more tension between the characters.
     - The **shared goal** must be a **common objective** that both agents strive for, even if they have **different methods or priorities** in achieving it.
-    - The **agents** are key players in the scenario, each with **distinct roles, motivations, and potential conflicts**.
     - The scenario must be **open-ended**, allowing for multiple perspectives and possible resolutions.
     - Agent **roles** are clearly defined, and will affect how they interact with each other and the scenario.
     - **Personal Goals**:  
@@ -745,7 +744,7 @@ def concept_agent_prompt(agent1_name, agent2_name, goal_category, first_agent_go
         - The shared goal is provided, but you can refine it to make it more specific and impactful for the scenario.
 
     ### CONSTRAINTS ###
-    1. **Use only the predefined agents** provided in the configuration.
+    1. Instead of using the names of the agents, use the words "[Agent 1]" and "[Agent 2]" to refer to them.
     2. Ensure the **dilemma is central** to the scenario, making it difficult for any one decision to be objectively “correct.”
     3. Avoid excessive exposition—focus on actions, conflicts, and choices rather than unnecessary descriptions.
     4. Do not add any additional commentary or explanations outside of the scenario.
@@ -761,9 +760,7 @@ def concept_agent_prompt(agent1_name, agent2_name, goal_category, first_agent_go
     - prototype of first agent goal: {first_agent_goal}
     - prototype of second agent goal: {second_agent_goal}
     - prototype of shared goal: {shared_goal}
-    - Agent 1: {agent1_name}
     - Agent 1 role: {agent1_role}
-    - Agent 2: {agent2_name}
     - Agent 2 role: {agent2_role}
     ### Task ###
     Generate a dilemma-driven scenario that aligns with the above configuration.
@@ -799,7 +796,7 @@ def concept_agent_prompt(agent1_name, agent2_name, goal_category, first_agent_go
     except json.JSONDecodeError:
         return {"error": "Failed to parse JSON from response."}
 
-def narrative_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free", temperature = 1):
+def narrative_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free", temperature = 1):
     json_format = {
         "scenario": "string",
         "shared_goal": "string",
@@ -821,6 +818,7 @@ def narrative_agent_prompt(input_scenario, shared_goal, first_agent_goal, second
     1. Do **not** alter the fundamental dilemma or core conflict.
     2. Do **not** introduce new characters unless necessary for depth.
     3. Ensure all refinements align with the given setting and characters.
+    4. Remember to refer to the agents as "[Agent 1]" and "[Agent 2]" instead of using their names.
 
     ### OUTPUT FORMAT ###
     Return the refined scenario in the following **JSON format**:
@@ -832,10 +830,10 @@ def narrative_agent_prompt(input_scenario, shared_goal, first_agent_goal, second
     ### INPUT SCENARIO ###
     {input_scenario}
     ### GOALS ###
-    {agent1_name} goal: {first_agent_goal} 
-    {agent2_name} goal: {second_agent_goal} 
-    {agent1_name} role: {agent1_role}
-    {agent2_name} role: {agent2_role}
+    [Agent 1] goal: {first_agent_goal} 
+    [Agent 2] goal: {second_agent_goal} 
+    [Agent 1] role: {agent1_role}
+    [Agent 2] role: {agent2_role}
     Shared goal: {shared_goal}
     ### TASK ###
     Refine the scenario according to the given input, ensuring:
@@ -866,7 +864,7 @@ def narrative_agent_prompt(input_scenario, shared_goal, first_agent_goal, second
     except json.JSONDecodeError:
         return {"error": "Failed to parse JSON from response."}
 
-def logical_consistency_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free", temperature = 1):
+def logical_consistency_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free", temperature = 1):
     json_format = {
         "scenario": "string",
         "shared_goal": "string",
@@ -888,6 +886,7 @@ def logical_consistency_agent_prompt(input_scenario, shared_goal, first_agent_go
     - Acknowledge any logical errors or inconsistencies before refining the scenario.
     - Do not add any additional commentary or explanations outside of the refined scenario.
     - Maintain the original intent and themes of the input scenario.
+    - Refer to the agents as "[Agent 1]" and "[Agent 2]" instead of using names.
 
     ### OUTPUT FORMAT ###
     Provide the refined scenario in the following JSON format:
@@ -899,10 +898,10 @@ def logical_consistency_agent_prompt(input_scenario, shared_goal, first_agent_go
     ### INPUT SCENARIO ###
     {input_scenario}
     ### GOALS ###
-    {agent1_name} goal: {first_agent_goal} 
-    {agent2_name} goal: {second_agent_goal} 
-    {agent1_name} role: {agent1_role}
-    {agent2_name} role: {agent2_role}
+    [Agent 1] goal: {first_agent_goal} 
+    [Agent 2] goal: {second_agent_goal} 
+    [Agent 1] role: {agent1_role}
+    [Agent 2] role: {agent2_role}
     shared goal: {shared_goal}
     ### Task ###
     Refine the scenario based on logical consistency, ensuring:
@@ -931,7 +930,7 @@ def logical_consistency_agent_prompt(input_scenario, shared_goal, first_agent_go
     except json.JSONDecodeError:
         return {"error": "Failed to parse JSON from response."}
 
-def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free", temperature = 1):
+def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_agent_goal, agent1_role, agent2_role, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free", temperature = 1):
     json_format = {
         "scenario": "string",
         "shared_goal": "string",
@@ -983,10 +982,10 @@ def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_
     ### INPUT SCENARIO ###
     {input_scenario}
     ### GOALS ###
-    {agent1_name} goal: {first_agent_goal} 
-    {agent2_name} goal: {second_agent_goal} 
-    {agent1_name} role: {agent1_role}
-    {agent2_name} role: {agent2_role}
+    [Agent 1] goal: {first_agent_goal} 
+    [Agent 2] goal: {second_agent_goal} 
+    [Agent 1] role: {agent1_role}
+    [Agent 2] role: {agent2_role}
     shared goal: {shared_goal}
     ### Task ###
     Refine the scenario according to the given input, ensuring:
@@ -996,6 +995,7 @@ def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_
     - Difficulty level adjusted based on the specified temperature parameter.
 
     **Important**: Provide only the refined scenario without additional commentary or explanations.
+    **Important**: Refer to the agents as "[Agent 1]" and "[Agent 2]" instead of using their names.
 
     Now, provide the refined scenario. 
     """
@@ -1018,14 +1018,15 @@ def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_
     except json.JSONDecodeError:
         return {"error": "Failed to parse JSON from response."}
 
-def choose_goal_prompt(base_goals: dict, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
+def choose_goal_prompt(base_shared_goal: dict, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
         "chosen_goal_category" : "string",
     }
     system_message = f"""
     You are an expert in **goal selection and narrative design**.
-    Your task is to **choose a distinct goal category** for two characters based on their provided base goals abbreviations and labels. 
-    Two characters are presented with their base goals, and you must select most appropriate goal category that aligns with their motivations and the context of the scenario.
+    Your task is to **choose a distinct goal category**  based on the provided base shared goal abbreviation and label. 
+    Two characters have a shared goal, towards which they will be working together. You are presented with the abbreviation and label of their base shared goal.
+    Your task is to select a goal category that best fits the characters' shared goal.
     You are also provided with a list of possible goal categories to choose from.
     ### GOAL CATEGORIES ###
     - **Information Acquisition**: Goals focused on gathering knowledge, data, or insights.
@@ -1043,15 +1044,12 @@ def choose_goal_prompt(base_goals: dict, client: OpenAI, model_name = "deepseek/
     """
     user_message = f"""
     ### INPUT ###
-    Base Goal Abbreviation 1: {base_goals["base_goal_abbreviation_1"]}
-    Base Goal Abbreviation 2: {base_goals["base_goal_abbreviation_2"]}
-    Base Goal Label 1: {base_goals["base_goal_label_1"]}
-    Base Goal Label 2: {base_goals["base_goal_label_2"]}
+    Base Shared Goal Abbreviation 1: {base_shared_goal["base_goal_shared_abbreviation"]}
+    Base Shared Goal Label 1: {base_shared_goal["base_goal_shared_full_label"]}
     ### Task ###
-    Choose a distinct goal category for the character based on the provided information.
+    Choose a distinct goal category for the characters based on the provided information.
 
     **Important**: Provide only the chosen goal category without additional commentary or explanations.
-    **Important**: Numbers 1 and 2 in the base goal abbreviations refer to the first and second character respectively.
 
     Now, choose the goal category.
     """
@@ -1074,7 +1072,7 @@ def choose_goal_prompt(base_goals: dict, client: OpenAI, model_name = "deepseek/
     except json.JSONDecodeError:
         return {"error": "Failed to parse JSON from response."}
 
-def extrapolate_goals_prompt(base_goals: dict, goal_category, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
+def extrapolate_goals_prompt(base_shared_goal: dict, goal_category, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
         "first_agent_extrapolated_goal": "string",
         "second_agent_extrapolated_goal": "string",
@@ -1082,32 +1080,33 @@ def extrapolate_goals_prompt(base_goals: dict, goal_category, client: OpenAI, mo
     }
     system_message = f"""
     You are an expert in **goal extrapolation and narrative design**.
-    Your task is to **extrapolate specific personal goals** for two characters based on their provided base goals abbreviations, labels, and the chosen goal category.
-    Two characters are presented with their base goals and a goal category. Your task is to expand these base goals into more specific personal goals that align with the chosen goal category.
-    Moreover, you need to create a shared goal that both characters will try to achieve in the scenario.
-    ### EXAMPLE EXTRAPOLATION ###
-    Goal Category: Information Acquisition
-    Base Goal Abbreviation 1: Career
-    Base Goal Label 1: Having a career
-    Base Goal Abbreviation 2: Being free
-    Base Goal Label 2: Having freedom (being a free person)
-    Extrapolated Personal Goal 1: Wanting to acquire important information about the industry to advance in their career.
-    Extrapolated Personal Goal 2: Wanting to gather knowledge about the world to understand their place in it and maintain their freedom.
-    Shared Goal: Gather crucial information that will help them in their respective careers while ensuring they remain free individuals.
+    Your task is to **extrapolate specific personal goals** for two characters based on their provided shared base goal abbreviation, labels, and the chosen goal category.
+    Two characters are presented with the base form of the shared goal and a goal category. 
+    You have two tasks:
+    1. **Create Personal Goals**:
+        - For each character, create a specific personal goal that aligns with the base shared goal and the chosen goal category.
+        - You can be creative in designing these personal goals as they will be used in a scenario where the characters will interact.
+        - It is encouraged for the personal goals to be in conflict with each other, as this will create a more interesting scenario.
+        - You will create two personal goals, one for each character.
+    2. **Extrapolate a Shared Goal**:
+        - Expand the base shared goal into a more specific shared goal that both characters will strive to achieve in the scenario.
+        - Use base shared goal information and the chosen goal category to create a compelling shared goal.
+        - The shared goal should be a common objective that both characters strive for, even if they have different methods or priorities in achieving it.
+
     ### OUTPUT FORMAT ###
     Return the extrapolated goals in the following **JSON format**:
     {json_format}
     """
     user_message = f"""
     ### INPUT ###
-    Base Goal Abbreviation 1: {base_goals["base_goal_abbreviation_1"]}
-    Base Goal Abbreviation 2: {base_goals["base_goal_abbreviation_2"]}
-    Base Goal Label 1: {base_goals["base_goal_label_1"]}
-    Base Goal Label 2: {base_goals["base_goal_label_2"]}
+    Base Shared Goal Abbreviation: {base_shared_goal["base_goal_shared_abbreviation"]}
+    Base Shared Goal Label: {base_shared_goal["base_goal_shared_full_label"]}
     Goal Category: {goal_category}
     ### Task ###
-    Extrapolate specific personal goals for the two characters based on their provided base goals and the chosen goal category.
-    **Important**: Provide only the chosen goal category without additional commentary or explanations.
+    Create specific personal goals for two characters based on the provided base shared goal and the chosen goal category.
+    Expand a shared goal that both characters will strive to achieve in the scenario.
+    
+    **Important**: Provide only the extrapolated/created goals without additional commentary or explanations.
     """
     messages = [
         {"role": "system", "content": system_message},
@@ -1128,15 +1127,15 @@ def extrapolate_goals_prompt(base_goals: dict, goal_category, client: OpenAI, mo
     except json.JSONDecodeError:
         return {"error": "Failed to parse JSON from response."}
 
-def generate_roles_prompt(agent1_name, agent2_name, goal_category, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
+def generate_roles_prompt(goal_category, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
         "agent1_role": "string",
         "agent2_role": "string"
     }
     system_message = f"""
     You are an expert in **role generation and narrative design**.
-    Your task is to **generate distinct roles** for two characters based on their names and goal category. 
-    The roles should reflect the characters' personalities, motivations, and the context of the scenario.
+    Your task is to **generate distinct roles** for two characters based only on the goal category. 
+    The goal category provides the thematic framework for the characters' roles, guiding their interactions and behaviors in a scenario.
     
     ### OUTPUT FORMAT ###
     Return the generated roles in the following **JSON format**:
@@ -1145,8 +1144,6 @@ def generate_roles_prompt(agent1_name, agent2_name, goal_category, client: OpenA
     
     user_message = f"""
     ### INPUT ###
-    Agent 1 Name: {agent1_name}
-    Agent 2 Name: {agent2_name}
     Goal Category: {goal_category}
 
     ### Task ###
