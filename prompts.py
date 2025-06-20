@@ -783,7 +783,10 @@ def concept_agent_prompt(goal_category, first_agent_goal, second_agent_goal, sha
             {"role": "user", "content": user_message},
         ]
     completion = client.chat.completions.create(
-        extra_body={}, # here we can declare a provider if needed 
+        extra_body={
+            "provider": {  # 👈 Add provider selection here
+            "only": ["targon"]
+        }}, # here we can declare a provider if needed 
         model=model_name,
         response_format={
             'type': 'json_object'
@@ -851,7 +854,11 @@ def narrative_agent_prompt(input_scenario, shared_goal, first_agent_goal, second
         ]
 
     completion = client.chat.completions.create(
-        extra_body={},
+        extra_body={
+            "provider": {  # 👈 Add provider selection here
+                "only": ["targon"]
+            }
+        },
         model=model_name,
         response_format={
             'type': 'json_object'
@@ -917,7 +924,11 @@ def logical_consistency_agent_prompt(input_scenario, shared_goal, first_agent_go
         ]
 
     completion = client.chat.completions.create(
-        extra_body={},
+        extra_body={
+            "provider": {
+                "only": ["targon"]
+            }
+        },
         model=model_name,
         response_format={
             'type': 'json_object'
@@ -1059,7 +1070,11 @@ def choose_goal_category_prompt(base_shared_goal: dict, client: OpenAI, model_na
     ]
 
     completion = client.chat.completions.create(
-        extra_body={},
+        extra_body={
+            "provider": {  # 👈 Add provider selection here
+                "only": ["targon"]
+            }
+        },  # here we can declare a provider if needed
         model=model_name,
         response_format={
             'type': 'json_object'

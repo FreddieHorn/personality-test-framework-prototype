@@ -16,7 +16,9 @@ emb_model = AutoModel.from_pretrained(emb_model_name)
 def scenario_generation(input_csv: str, output_csv: str, client: OpenAI, mode = 'default', temperature = 1):
     # Load the input data
     data = pd.read_csv(input_csv)
-
+    pd.DataFrame(columns=data.columns.tolist() + [
+        'scenario', 'shared_goal', 'first_agent_goal', 'second_agent_goal'
+    ]).to_csv(output_csv, index=False)
     # Process rows
     results = []
     log.info(f"Generating Scenarios for temperature {temperature} and mode: {mode}")
@@ -54,15 +56,29 @@ def scenario_generation(input_csv: str, output_csv: str, client: OpenAI, mode = 
             step_2_scenario = narrative_agent_prompt(step_1_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_role, agent2_role, client=client)
             step_3_scenario = conflict_agent_prompt(step_2_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_role, agent2_role, client=client, temperature=temperature)
             result_scenario = logical_consistency_agent_prompt(step_3_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_role, agent2_role, client=client)
-            results.append(result_scenario)
+            # results.append(result_scenario)
+            result_row = row.to_dict()
+            result_row.update({
+                "scenario": result_scenario.get("scenario", ""),
+                "shared_goal": result_scenario.get("shared_goal", ""),
+                "first_agent_goal": result_scenario.get("first_agent_goal", ""),
+                "second_agent_goal": result_scenario.get("second_agent_goal", "")
+            })
+            
+            pd.DataFrame([result_row]).to_csv(
+                output_csv, 
+                mode='a', 
+                header=False, 
+                index=False
+            )
 
      # Save results
-    data["scenario"] = [result.get("scenario", "") for result in results]
-    data["shared_goal"] = [result.get("shared_goal", "") for result in results]
-    data["first_agent_goal"] = [result.get("first_agent_goal", "") for result in results]
-    data["second_agent_goal"] = [result.get("second_agent_goal", "") for result in results]
-    data.to_csv(output_csv, index=False)
-    log.info(f"Results saved to {output_csv}")
+    # data["scenario"] = [result.get("scenario", "") for result in results]
+    # data["shared_goal"] = [result.get("shared_goal", "") for result in results]
+    # data["first_agent_goal"] = [result.get("first_agent_goal", "") for result in results]
+    # data["second_agent_goal"] = [result.get("second_agent_goal", "") for result in results]
+    # data.to_csv(output_csv, index=False)
+    # log.info(f"Results saved to {output_csv}")
 
 def get_embedding(sentence):
     tokens = emb_tokenizer(sentence, return_tensors="pt", padding=True, truncation=True)
