@@ -1018,7 +1018,7 @@ def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_
     except json.JSONDecodeError:
         return {"error": "Failed to parse JSON from response."}
 
-def choose_goal_prompt(base_shared_goal: dict, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
+def choose_goal_category_prompt(base_shared_goal: dict, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
         "chosen_goal_category" : "string",
     }

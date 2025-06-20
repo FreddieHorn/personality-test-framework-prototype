@@ -34,16 +34,13 @@ def scenario_generation(input_csv: str, output_csv: str, client: OpenAI, mode = 
             log.info(result) 
     elif mode == 'agentic':
         for _, row in data.iterrows():
-            agent1_name = row["Character1"], 
-            agent2_name= row["Character2"], 
             goal_category=row["goal_category"],
             first_agent_goal=row["first_agent_goal"],
             second_agent_goal=row["second_agent_goal"],
             shared_goal=row["shared_goal"],
             agent1_role=row["agent1_role"],
             agent2_role=row["agent2_role"]
-            step_1_scenario = concept_agent_prompt(agent1_name, 
-                                                agent2_name, 
+            step_1_scenario = concept_agent_prompt(
                                                 goal_category,
                                                 first_agent_goal,
                                                 second_agent_goal,
@@ -54,9 +51,9 @@ def scenario_generation(input_csv: str, output_csv: str, client: OpenAI, mode = 
             shared_goal = step_1_scenario["shared_goal"]
             first_agent_goal = step_1_scenario["first_agent_goal"]
             second_agent_goal = step_1_scenario["second_agent_goal"]
-            step_2_scenario = narrative_agent_prompt(step_1_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client=client)
-            step_3_scenario = conflict_agent_prompt(step_2_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client=client, temperature=temperature)
-            result_scenario = logical_consistency_agent_prompt(step_3_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_name, agent2_name, agent1_role, agent2_role, client=client)
+            step_2_scenario = narrative_agent_prompt(step_1_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_role, agent2_role, client=client)
+            step_3_scenario = conflict_agent_prompt(step_2_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_role, agent2_role, client=client, temperature=temperature)
+            result_scenario = logical_consistency_agent_prompt(step_3_scenario["scenario"], shared_goal, first_agent_goal, second_agent_goal, agent1_role, agent2_role, client=client)
             results.append(result_scenario)
 
      # Save results

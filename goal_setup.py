@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import re
 from transformers import AutoModel, AutoTokenizer
-from prompts import choose_goal_prompt, extrapolate_goals_prompt, generate_roles_prompt
+from prompts import choose_goal_category_prompt, extrapolate_goals_prompt, generate_roles_prompt
 from logging import getLogger
 from openai import OpenAI
 from utils import sample_shared_goal
@@ -20,7 +20,7 @@ def setup_goals(output_csv: str, client: OpenAI, num_records: int = 10):
         # Generate data for each record
         base_shared_goal = sample_shared_goal("Human_Goals_List_Clean.csv")
         print(f"Base Shared Goal: {base_shared_goal}")
-        goal_category = choose_goal_prompt(base_shared_goal=base_shared_goal, client=client)
+        goal_category = choose_goal_category_prompt(base_shared_goal=base_shared_goal, client=client)
         print(f"Chosen Goal Category: {goal_category['chosen_goal_category']}")
         extrapolated_goals = extrapolate_goals_prompt(
             base_shared_goal=base_shared_goal,
