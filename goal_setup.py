@@ -18,31 +18,27 @@ def setup_goals(output_csv: str, client: OpenAI, num_records: int = 10):
     
     for _ in range(num_records):
         # Generate data for each record
-        base_shared_goal = sample_shared_goal("Human_Goals_List_Clean.csv")
-        print(f"Base Shared Goal: {base_shared_goal}")
-        goal_category = choose_goal_category_prompt(base_shared_goal=base_shared_goal, client=client)
-        print(f"Chosen Goal Category: {goal_category['chosen_goal_category']}")
-        extrapolated_goals = extrapolate_goals_prompt(
-            base_shared_goal=base_shared_goal,
-            goal_category=goal_category["chosen_goal_category"],
-            client=client
-        )
-        print(f"Extrapolated Goals: {extrapolated_goals}")
+        base_shared_goal = sample_shared_goal("Human_Goals_List_Clean_Updated.csv")
+        # print(f"Base Shared Goal: {base_shared_goal}")
+        goal_category = choose_goal_category_prompt(base_shared_goal=base_shared_goal, client=client, model_name="deepseek/deepseek-chat-v3-0324")
+        print(f"Chosen Goal Category: {goal_category}")
+        # print(f"First Agent Goal: {goal_category['first_agent_goal']}, Second Agent Goal: {goal_category['second_agent_goal']}")
 
-        roles = generate_roles_prompt(
-            goal_category=goal_category["chosen_goal_category"],
-            client=client
-        )
-        print(f"Generated Roles: {roles}")
+        # roles = generate_roles_prompt(
+        #     goal_category=goal_category["chosen_social_goal_category"],
+        #     client=client,
+        #     model_name="deepseek/deepseek-chat-v3-0324:free",
+        # )
+        # print(f"Generated Roles: {roles}")
         # Store results
         results.append({
             "base_shared_goal": base_shared_goal,
-            "goal_category": goal_category["chosen_goal_category"],
-            "first_agent_goal": extrapolated_goals["first_agent_extrapolated_goal"],
-            "second_agent_goal": extrapolated_goals["second_agent_extrapolated_goal"],
-            "shared_goal": extrapolated_goals["shared_goal"],
-            "agent1_role": roles["agent1_role"],
-            "agent2_role": roles["agent2_role"]
+            "social_goal_category": goal_category["chosen_social_goal_category"],
+            "first_agent_goal": goal_category["first_agent_goal"],
+            "second_agent_goal": goal_category["second_agent_goal"],
+            "shared_goal": base_shared_goal["base_goal_shared_full_label"],
+            "agent1_role": goal_category["agent1_role"],
+            "agent2_role": goal_category["agent2_role"]
         })
 
     # Convert to DataFrame and save

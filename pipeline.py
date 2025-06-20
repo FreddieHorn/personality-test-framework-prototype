@@ -30,7 +30,7 @@ if __name__ == "__main__":
     prefix = f"results_may"
     os.makedirs(f"output/{prefix}", exist_ok=True)
     log.info("Starting pipeline...")
-    # setup_goals("goals_10.csv", client, num_records=10)
+    setup_goals("goals_5_experiment_2.csv", client, num_records=5)
     # for temperature in tempratures: # I know that this triple for loop is diabolical and bash script probably would be better
     #     for scengen_mode in scenario_generation_modes:
     #         for inter_mode in interaction_modes:
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     #                 # step_3_csv_path = f'output/{folder_name}/evaluated_interactions.csv'
     #                 # evaluate_scenarios_path = f'output/{folder_name}/evaluated_scenarios_v2.csv'
     #                 # evaluated_interactions_path = f'output/{folder_name}/evaluated_interactions2.csv'
-    scenario_generation('goals_10.csv', 'scenarios_10.csv', client, mode='agentic', temperature = 3)
+    # scenario_generation('goals_10.csv', 'scenarios_10.csv', client, mode='agentic', temperature = 3)
                     # generate_interaction(step_1_csv_path, step_2_csv_path, model, tokenizer, mode=inter_mode)
                     # evaluation(step_2_csv_path, step_3_csv_path, model, tokenizer)
                     # evaluate_scenarios(step_3_csv_path, evaluate_scenarios_path, model, tokenizer)

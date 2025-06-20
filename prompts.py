@@ -1,5 +1,6 @@
 from openai import OpenAI
 import json
+from utils import extract_json_string
 def scenario_narrative_cohesiveness_score(scenario, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
         "type": "object",
@@ -1031,48 +1032,51 @@ def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_
 
 def choose_goal_category_prompt(base_shared_goal: dict, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
-        "chosen_goal_category" : "string",
+        "explaination": "string",
+        "chosen_social_goal_category" : "string",
+        "first_agent_goal": "string",
+        "second_agent_goal": "string",
+        "agent1_role": "string",
+        "agent2_role": "string"
     }
-    system_message = f"""
-    You are an expert in **goal selection and narrative design**.
-    Your task is to **choose a distinct goal category**  based on the provided base shared goal abbreviation and label. 
-    Two characters have a shared goal, towards which they will be working together. You are presented with the abbreviation and label of their base shared goal.
-    Your task is to select a goal category that best fits the characters' shared goal.
-    You are also provided with a list of possible goal categories to choose from.
-    ### GOAL CATEGORIES ###
-    - **Information Acquisition**: Goals focused on gathering knowledge, data, or insights.
-    - **Information Provision**: Goals centered on sharing knowledge, data, or insights with others.
-    - **Relationship Building**: Goals aimed at establishing or strengthening connections with others.
-    - **Relationship Maintenance**: Goals focused on sustaining existing relationships and ensuring their health.
-    - **Identity Recognition**: Goals related to gaining acknowledgment or validation of one's identity, beliefs, or values.
-    - **Cooperation**: Goals that involve working together with others towards a common objective.
-    - **Competition**: Goals that involve striving against others to achieve a specific outcome or recognition.
-    - **Conflict Resolution**: Goals aimed at resolving disputes or disagreements with others.
-    
+
+    user_message = f"""
+    ### GOAL: ###
+    We aim to explore how personality traits influence behavior in social contexts by simulating psychologically profiled role-playing agents. These agents will be placed in interpersonal situations involving shared goals, where their behavior reflects both their personality traits and social roles.
+
+    ## TASK: ###
+    Your task consists of the following steps:
+
+    1. Select one social goal category from the list below.
+    2. Based on the chosen social goal category and the shared goal of {base_shared_goal["base_goal_shared_full_label"]}, define a specific personal goal for each agent that reflects their perspective and motivation.
+    3. Assign each agent a social role that shapes how they interact with the other agent in pursuit of their personal and shared goals.
+
+    ### SHARED GOAL: ###
+    {base_shared_goal["base_goal_shared_full_label"]}
+
+    ### SOCIAL GOAL CATEGORIES: ###
+    1. Information Acquisition
+    2. Information Provision
+    3. Relationship Building
+    4. Relationship Maintenance
+    5. Identity Recognition
+    6. Cooperation
+    7. Competition
+    8. Conflict Resolution
+
     ### OUTPUT FORMAT ###
-    Return the chosen goal type in the following **JSON format**:
+    Return the chosen goal category and the personal goals in the following **JSON format**. 
+    A dictionary with the following keys:
     {json_format}
     """
-    user_message = f"""
-    ### INPUT ###
-    Base Shared Goal Abbreviation 1: {base_shared_goal["base_goal_shared_abbreviation"]}
-    Base Shared Goal Label 1: {base_shared_goal["base_goal_shared_full_label"]}
-    ### Task ###
-    Choose a distinct goal category for the characters based on the provided information.
-
-    **Important**: Provide only the chosen goal category without additional commentary or explanations.
-
-    Now, choose the goal category.
-    """
     messages = [
-        {"role": "system", "content": system_message},
         {"role": "user", "content": user_message},
     ]
 
     completion = client.chat.completions.create(
         extra_body={
             "provider": {  # 👈 Add provider selection here
-                "only": ["targon"]
+                "only": ["DeepInfra"]
             }
         },  # here we can declare a provider if needed
         model=model_name,
@@ -1083,9 +1087,12 @@ def choose_goal_category_prompt(base_shared_goal: dict, client: OpenAI, model_na
         max_tokens=1000,
     )
     try:
+        print(completion.choices[0].message.content)
         return json.loads(completion.choices[0].message.content)
     except json.JSONDecodeError:
-        return {"error": "Failed to parse JSON from response."}
+        return extract_json_string(completion.choices[0].message.content)
+
+        # return {"error": "Failed to parse JSON from response."}
 
 def extrapolate_goals_prompt(base_shared_goal: dict, goal_category, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
@@ -1140,7 +1147,8 @@ def extrapolate_goals_prompt(base_shared_goal: dict, goal_category, client: Open
     try:
         return json.loads(completion.choices[0].message.content)
     except json.JSONDecodeError:
-        return {"error": "Failed to parse JSON from response."}
+        return extract_json_string(completion.choices[0].message.content)
+        # return {"error": "Failed to parse JSON from response."}
 
 def generate_roles_prompt(goal_category, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
@@ -1175,7 +1183,11 @@ def generate_roles_prompt(goal_category, client: OpenAI, model_name = "deepseek/
     ]
 
     completion = client.chat.completions.create(
-        extra_body={},
+        extra_body={
+            # "provider": {  # 👈 Add provider selection here
+            #     "only": ["targon"]
+            # }
+        },
         model=model_name,
         response_format={
             'type': 'json_object'
@@ -1188,4 +1200,5 @@ def generate_roles_prompt(goal_category, client: OpenAI, model_name = "deepseek/
         return json.loads(completion.choices[0].message.content)
     except json.JSONDecodeError:
         print(completion.choices[0].message.content)
-        return {"error": "Failed to parse JSON from response."}
+        return extract_json_string(completion.choices[0].message.content)
+        # return {"error": "Failed to parse JSON from response."}
