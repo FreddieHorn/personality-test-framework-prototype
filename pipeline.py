@@ -30,7 +30,7 @@ if __name__ == "__main__":
     prefix = f"results_may"
     os.makedirs(f"output/{prefix}", exist_ok=True)
     log.info("Starting pipeline...")
-    setup_goals("goals_5_experiment_2.csv", client, num_records=5)
+    setup_goals("goals_50_ptt.csv", "Human_Goals_List_Clean_Updated.csv", client, num_records=5)
     # for temperature in tempratures: # I know that this triple for loop is diabolical and bash script probably would be better
     #     for scengen_mode in scenario_generation_modes:
     #         for inter_mode in interaction_modes:

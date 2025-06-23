@@ -1030,7 +1030,7 @@ def conflict_agent_prompt(input_scenario, shared_goal, first_agent_goal, second_
     except json.JSONDecodeError:
         return {"error": "Failed to parse JSON from response."}
 
-def choose_goal_category_prompt(base_shared_goal: dict, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
+def choose_goal_category_prompt(base_shared_goal: dict, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free", provider = None):
     json_format = {
         "explaination": "string",
         "chosen_social_goal_category" : "string",
@@ -1048,11 +1048,11 @@ def choose_goal_category_prompt(base_shared_goal: dict, client: OpenAI, model_na
     Your task consists of the following steps:
 
     1. Select one social goal category from the list below.
-    2. Based on the chosen social goal category and the shared goal of {base_shared_goal["base_goal_shared_full_label"]}, define a specific personal goal for each agent that reflects their perspective and motivation.
+    2. Based on the chosen social goal category and the shared goal of {base_shared_goal["Full label"]}, define a specific personal goal for each agent that reflects their perspective and motivation.
     3. Assign each agent a social role that shapes how they interact with the other agent in pursuit of their personal and shared goals.
 
     ### SHARED GOAL: ###
-    {base_shared_goal["base_goal_shared_full_label"]}
+    {base_shared_goal["Full label"]}
 
     ### SOCIAL GOAL CATEGORIES: ###
     1. Information Acquisition
@@ -1074,11 +1074,9 @@ def choose_goal_category_prompt(base_shared_goal: dict, client: OpenAI, model_na
     ]
 
     completion = client.chat.completions.create(
-        extra_body={
-            "provider": {  # 👈 Add provider selection here
-                "only": ["DeepInfra"]
-            }
-        },  # here we can declare a provider if needed
+        extra_body = {
+            "provider": {"only": [provider]} 
+        } if provider else {},
         model=model_name,
         response_format={
             'type': 'json_object'
@@ -1087,14 +1085,13 @@ def choose_goal_category_prompt(base_shared_goal: dict, client: OpenAI, model_na
         max_tokens=1000,
     )
     try:
-        print(completion.choices[0].message.content)
         return json.loads(completion.choices[0].message.content)
     except json.JSONDecodeError:
         return extract_json_string(completion.choices[0].message.content)
 
-        # return {"error": "Failed to parse JSON from response."}
 
 def extrapolate_goals_prompt(base_shared_goal: dict, goal_category, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
+    # OUTDATED 
     json_format = {
         "first_agent_extrapolated_goal": "string",
         "second_agent_extrapolated_goal": "string",
