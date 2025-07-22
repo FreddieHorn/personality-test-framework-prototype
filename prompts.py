@@ -278,79 +278,111 @@ def agent_prompt(agent_name: str, scenario: str, setting:str, shared_goal: str, 
     return completion.choices[0].message
 def evaluation_prompt_personal_goal(interaction,agent1,agent2, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):
     json_format = {
-    "type": "object",
-    "properties": {
         "Agent A": {
-            "type": "object",
-            "properties": {
-                "Goal": {"type": "object", "properties": {"score": {"type": "string"}, "reasoning": {"type": "string"}}, "required": ["score", "reasoning"]}
-            },
-            "required": ["Goal"]
+            "name": "string",
+            "personal_goal_completion": "integer",
+            "shared_goal_completion": "integer",
+            "share": "float"
         },
         "Agent B": {
-            "type": "object",
-            "properties": {
-                "Goal": {"type": "object", "properties": {"score": {"type": "string"}, "reasoning": {"type": "string"}}, "required": ["score", "reasoning"]}
-            },
-            "required": ["Goal"]
+            "name": "string",
+            "personal_goal_completion": "integer",
+            "shared_goal_completion": "integer",
+            "share": "float"
         }
-    },
-    "required": ["Agent A", "Agent B"]
-    }
-    system_message = """
-    ### Persona ###
-    You are an expert in behavioral psychology and personality analysis. 
-    Your task is to evaluate the interaction between two agents based on their goals and personalities within a defined scenario. 
-    You must assign a score for **Goal Completion** (GOAL) on a scale from 0 to 10 for each agent. 
-
-    ### GOAL Dimension Defined ###
-    - **Goal Completion (GOAL) [0–10]**: Evaluate how well each agent achieved their **personal** goal within the interaction.
-        - Score of 0: Minimal or no goal achievement
-        - Score of 10: Complete goal achievement
-        - Higher scores = more progress toward their personal goals
-
-    You MUST:
-    1. Reiterate each agent’s goal.
-    2. Analyze the interaction in relation to that goal.
-    3. Provide a clear and logical explanation in the `reasoning` field.
-    4. Provide an integer score in the `score` field.
-    5. Align actions and dialogue with their defined personality vectors.
-
-    ### Output Format ###
-    Your response must follow this structure:
-
-    - **Agent A**  
-        -- Score: [0–10]  
-        -- Reasoning: [explanation of how the agent’s actions aligned with their goal and personality]  
-
-    - **Agent B**  
-        -- Score: [0–10]  
-        -- Reasoning: [same as above] 
-    """
+        }
     user_message = f"""
+    ### Goal ###
+    In our experiments, we explored how personality traits influence behavior in social contexts by simulating psychological profiled role-playing agents. 
+    You will evaluate the interaction between two agents based on their interaction, goals, social goal category and the scenario.
+    After your evaluation, you will provide a score, representing the extent to which the agent achieved their personal and shared goals.
+    
     ### Task ###
-    Evaluate the simulated social interaction below.
-
-    **Interaction:** {interaction}
-
-    **Character 1 (Agent A):** {agent1}  
-    **Personality Vector:** {personality1}  
-    **Goal:** {first_agent_goal}  
-
-    **Character 2 (Agent B):** {agent2}  
-    **Personality Vector:** {personality2}  
-    **Goal:** {second_agent_goal}  
-
-    **Scenario:** {scenario}  
-    **Setting:** {setting}  
-    **Topic:** {topic}  
-
-    Ensure your evaluation reflects alignment with both personal goals and personality vectors.
-    Follow the provided format exactly.
+    1. Evaluate the simulated social interaction below. The evaluation should be based on the interaction, shared goals and agent-specific goals and the scenario.
+    2. Assign a score for **Goal Completion** (GOAL) on a scale from 0 to 10 for each agent. This represents the extent to which the agent achieved their personal goal.
+    3. Provide a score for **Shared Goal Completion** (SGOAL) on a scale from 0 to 10 for each agent. This represents the extent to which the agent contributed to the shared goal.
+    4. Determine **how much each agent contributed** to the shared goal, expressed as a floating point share between 0.0 and 1.0.
+        - The sum of both agents' shares must equal exactly 1.0.
+        - The agent who contributed more will have the higher share.
+    5. Provide a clear and logical explanation in the `reasoning` field for both scores.
+    
+    ### INTERACTION ###
+    {interaction}
+    
+    ### AGENT A ###
+    agent name: {agent1}
+    personal goal: {first_agent_goal}
+    
+    ### AGENT B ###
+    agent name: {agent2}
+    personal goal: {second_agent_goal}
+    
+    ### SHARED GOAL ###
+    {shared_goal}
+    
+    ### SCENARIO ###
+    {scenario}
+    
+    ### OUTPUT FORMAT ###
+    Return the chosen goal category and the personal goals in the following **JSON format**. 
+    A dictionary with the following keys:
+    {json_format}
+    
+    ### Constraints ###
+    - Do not provide any explainations in the scoring fields, just provide scores and shares.
     """
+    # system_message = """
+    # ### Persona ###
+    # You are an expert in behavioral psychology and personality analysis. 
+    # Your task is to evaluate the interaction between two agents based on their goals and personalities within a defined scenario. 
+    # You must assign a score for **Goal Completion** (GOAL) on a scale from 0 to 10 for each agent. 
+
+    # ### GOAL Dimension Defined ###
+    # - **Goal Completion (GOAL) [0–10]**: Evaluate how well each agent achieved their **personal** goal within the interaction.
+    #     - Score of 0: Minimal or no goal achievement
+    #     - Score of 10: Complete goal achievement
+    #     - Higher scores = more progress toward their personal goals
+
+    # You MUST:
+    # 1. Reiterate each agent’s goal.
+    # 2. Analyze the interaction in relation to that goal.
+    # 3. Provide a clear and logical explanation in the `reasoning` field.
+    # 4. Provide an integer score in the `score` field.
+    # 5. Align actions and dialogue with their defined personality vectors.
+
+    # ### Output Format ###
+    # Your response must follow this structure:
+
+    # - **Agent A**  
+    #     -- Score: [0–10]  
+    #     -- Reasoning: [explanation of how the agent’s actions aligned with their goal and personality]  
+
+    # - **Agent B**  
+    #     -- Score: [0–10]  
+    #     -- Reasoning: [same as above] 
+    # """
+    # user_message = f"""
+    # ### Task ###
+    # Evaluate the simulated social interaction below.
+
+    # **Interaction:** {interaction}
+
+    # **Character 1 (Agent A):** {agent1}  
+    # **Personality Vector:** {personality1}  
+    # **Goal:** {first_agent_goal}  
+
+    # **Character 2 (Agent B):** {agent2}  
+    # **Personality Vector:** {personality2}  
+    # **Goal:** {second_agent_goal}  
+
+    # **Scenario:** {scenario}  
+    # **Setting:** {setting}  
+
+    # Ensure your evaluation reflects alignment with both personal goals and personality vectors.
+    # Follow the provided format exactly.
+    # """
 
     messages = [
-            {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
     completion = client.chat.completions.create(
@@ -529,61 +561,55 @@ def evaluation_prompt(interaction,agent1,agent2, goal, first_agent_goal, second_
     return completion.choices[0].message
 
 
-def scenario_creation_prompt(setting, topic, agent_1_name, agent_2_name, temperature, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):    # Define the JSON structure for the result
-    json_format = {
-        "type": "object",
-        "properties": {
-            "scenario": {"type": "string"},
-            "shared_goal": {"type": "string"},
-            "first_agent_goal" : {"type" : "string"},
-            "second_agent_goal" : {"type" : "string"}
-        },
-        "required": ["scenario", "shared_goal", "first_agent_goal", "second_agent_goal"]
-    }
-
-    # System message setting up the task for Llama
-    system_message = """
-    You are an expert in behavioral psychology and personality analysis. Your task is to create immersive and detailed scenarios in a user-defined setting and topic. These scenarios involve two agents who share the same goal, allowing you to assess how their personality traits influence their success.
-    The primary purpose of this task is to evaluate which agent’s personality type is more effective in achieving the shared goal. The scenario should highlight challenges, decisions, and interactions that reveal personality-driven differences in behavior.
-    """
-
+def scenario_creation_prompt(scenario_setting: dict, difficulty, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):    # Define the JSON structure for the result
     # User input defining the task
     user_message = f"""
-     ### Task 1: ###
-    Create a detailed scenario (short story with high level of details) based on the setting (low level of details) in the topic of (medium level of details) to evaluate how personality traits affect two agents’ success in achieving a shared goal. Use the following:
+    ### GOAL: ###
+    We aim to explore how personality traits influence behavior in social contexts by simulating psychologically profiled role-playing agents. These agents will be placed in interpersonal situations involving shared goals, where their behavior reflects both their personality traits and social roles.
 
-    Setting: {setting}
-    Topic: {topic}
+    ### TASK: ###
+    Given the following scenario setting and difficulty level, your task is to generate a scenario that sets up an interpersonal situation between two agents. This scenario will serve as the basis for generating the agents' interaction in the next step.
 
-    ### Scenario difficulty ###
-    Based on the temperature level, adjust the difficulty of the scenario. Temprature can range from 1 to 5, 1 representing the easiest scenario, 5 representing the most difficult one.
-    Difficult scenarios often contain situations where compromise is hard to reach, are designed to pit characters against each other, or present difficult dillemas.
-    Easy scenarios on the other hand, are relatively comfortable for the agents to behave in. Think of them as "normal" scenarios where there are few to none obstacles. 
-    Temprature level: {temperature}
-    ### Task 2: ###
-    Clearly define the shared goal and personal goals that both agents aim to achieve in the scenario. Ensure that the scenario includes opportunities for challenges, decision-making, or interactions where personality traits can affect the outcome.
-    Depending on the temprature level, personal goal of the agents will differ. 
-    ### Warning ### 
-    DONT USE ANY NAMES IN THE SCENARIO. INSTEAD USE THE WORD "AGENT 1, 2" etc.
+    The scenario should:
+    - Clearly describe the context in which the interaction will take place later.
+    - Consider the shared goal that both agents aim to achieve, as well as the personal goals of both agents within the situation, naturally and coherently.
+
+
+    ### SCENARIO SETTING: ###
+    {scenario_setting}
+
+    ### INSTRUCTION: ###
+    1. Refer to the agents using "[Agent 1]" and "[Agent 2]" instead of names.
+    2. Do not include any dialogue or interaction.
+    3. Generate only the context of the situation. The interaction between the agents will be generated in the next step.
+    4. Set the level of difficulty of the scenario to {difficulty} based on the following levels:
+    - Easy: Simple and cooperative; goals are easily aligned and attainable.
+    - Medium: Some tension or challenges are present, but goals are still potentially reconcilable.
+    - Hard: High tension or challenges that make the shared and individual goals hard to achieve.
+
+    ## OUTPUT FORMAT: ###
+    Your response must have the following JSON format:
+    json_format = {"scenario_context": "string"}
+
     """
     messages = [
-            {"role": "system", "content": system_message},
             {"role": "user", "content": user_message},
         ]
     completion = client.chat.completions.create(
-        extra_body={},
+        extra_body = {
+            "provider": {"only": [provider]} 
+        } if provider else {},
         model=model_name,
         response_format={
-            "type" : "json_schema",
-            "json_schema": {
-                "strict" : True,
-                "schema" : json_format
-            }
+            'type': 'json_object'
         },
         messages=messages,
         max_tokens=1000,
     )
-    return completion.choices[0].message
+    try:
+        return json.loads(completion.choices[0].message.content)
+    except json.JSONDecodeError:
+        return extract_json_string(completion.choices[0].message.content)
 
 def generate_interaction_prompt(agent1,agent2, goal, first_agent_goal, second_agent_goal, scenario, personality1, personality2,setting, topic, client: OpenAI, model_name = "deepseek/deepseek-chat-v3-0324:free"):    # Define the JSON structure for the result
     json_format = {
